@@ -14,7 +14,7 @@ jobs:
     timeout-minutes: 5
     if: github.event.pull_request.draft == false
     steps:
-      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.0
+      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.1
         with:
           api-key: ${{ secrets.LLM_API_KEY }}     # empty on fork PRs: the Action then does nothing
           base-url: https://openrouter.ai/api/v1  # any OpenAI-compatible endpoint, https only

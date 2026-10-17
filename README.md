@@ -23,7 +23,7 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.0
+      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.1
         with:
           api-key: ${{ secrets.LLM_API_KEY }}
           base-url: https://openrouter.ai/api/v1
@@ -64,7 +64,7 @@ Katto on tokeneissa, ei dollareissa: tokenit tiedetään ennen kutsua, dollarihi
 - Vain lisätyt rivit ja yksi mallikutsu. Ei repon muuta koodia kontekstina, ei rivikohtaisia kommentteja (yksi yhteenvetokommentti, päivitetään paikallaan), ei keskustelua eikä automaattisia korjauksia.
 - Suuri PR katkaistaan tokenkattoon: tiedostot, jotka eivät mahdu, näkyvät kommentin kohdassa "Not reviewed".
 - GitHubin ajurit eivät näe yksityisverkon (esim. Tailscale) osoitteita. Käytä julkista https-osoitetta.
-- Tekijän testit käyttävät väärennettyä GitHubia ja mallia sekä paikallista HTTP-palvelinta. Ensimmäinen oikea mallikokeilu tehdään erikseen (katso CHANGELOG).
+- Tekijän testit käyttävät väärennettyä GitHubia ja mallia sekä paikallista HTTP-palvelinta. Oikea mallikokeilu on tehty (katso CHANGELOG): pieni kehote vaikuttaa paljon, ja malli jättää silti osan virheistä löytämättä.
 
 ## Vaihtoehtoja ja miksi tämä
 
