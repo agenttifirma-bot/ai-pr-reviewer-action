@@ -1,0 +1,26 @@
+# Copy to .github/workflows/ai-review.yml in the repository you want reviewed.
+name: AI review
+on:
+  pull_request:                 # NOT pull_request_target: the Action refuses to run with it
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read                # the Action never checks out or runs PR code
+  pull-requests: write          # one comment, updated in place
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.0
+        with:
+          api-key: ${{ secrets.LLM_API_KEY }}     # empty on fork PRs: the Action then does nothing
+          base-url: https://openrouter.ai/api/v1  # any OpenAI-compatible endpoint, https only
+          model: deepseek/deepseek-chat
+          max-input-tokens: "20000"
+          max-output-tokens: "1500"
+          max-runs-per-pr: "5"
+          price-in: "0.30"                        # optional: USD per million tokens, for the cost estimate
+          price-out: "1.20"

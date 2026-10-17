@@ -1,0 +1,11 @@
+{
+  "name": "ai-pr-reviewer-action",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GitHub Action: AI pull request review with a hard token ceiling, an explicit 'unknown' answer and no access to PR code or secrets.",
+  "license": "MIT",
+  "author": "Tony Weckström",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "node --test \"test/*.test.js\"" }
+}
