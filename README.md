@@ -8,6 +8,44 @@ GitHub Action, joka kirjoittaa pull requestista yhden tekoälykommentin, jolla o
 
 **Teknologiat:** JavaScript (ESM), Node.js 22/24, `node:test`. Ei ajonaikaisia riippuvuuksia.
 
+## Quick start (English)
+
+Add the workflow from [`examples/review.yml`](examples/review.yml) to `.github/workflows/` and store the model key as the secret `LLM_API_KEY`:
+
+```yaml
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.1
+        with:
+          api-key: ${{ secrets.LLM_API_KEY }}
+          base-url: https://openrouter.ai/api/v1
+          model: deepseek/deepseek-chat
+```
+
+The Action does no `checkout`: it reads the changed files through the GitHub API and posts **one** comment, updated in place.
+
+| Input | Default | Meaning |
+| --- | --- | --- |
+| `api-key` | empty | Model key. Fork PRs get no secrets, so the Action then does nothing. |
+| `base-url` | required | OpenAI-compatible endpoint, `https` only. |
+| `model` | required | Model name. |
+| `max-input-tokens` | 20000 | Hard ceiling for the estimated input (max 100000). As many files as fit, smallest first; the rest are listed as "Not reviewed". |
+| `max-output-tokens` | 1500 | Hard ceiling for the reply (max 4000). |
+| `max-runs-per-pr` | 5 | Reviews per pull request across all pushes (max 20). |
+| `price-in`, `price-out` | 0 | USD per million tokens, only for the cost estimate in the comment. |
+| `dry-run` | `false` | `true` prints the comment to the log instead of posting it. |
+| `fail-on-error` | `false` | By default an error never blocks the PR. |
+
+Safety in short: it refuses `pull_request_target`, never runs or writes PR code, redacts secret-like strings and skips `.env`, key, lock and binary files before anything is sent, wraps the diff as data without tools, and only keeps findings that point at added lines the model was actually shown. The model may answer `unknown`, and the comment then says so. The token ceilings and run limits live in code, not in the prompt. Details (in Finnish) are in the sections below. The model can be wrong; the check verifies the location of a finding, not whether the claim is true.
+
 ## Käyttö
 
 Kopioi [`examples/review.yml`](examples/review.yml) repositoriosi kansioon `.github/workflows/` ja lisää salaisuus `LLM_API_KEY`:

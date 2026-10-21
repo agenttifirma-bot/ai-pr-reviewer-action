@@ -1,5 +1,9 @@
 # Muutosloki
 
+## Julkaisematon
+
+- README: englanninkielinen pikaohje (käyttö, asetukset, turvallisuus lyhyesti).
+
 ## 0.1.1 (17.10.2026)
 
 Ensimmäinen oikea mallikokeilu (OpenRouter, `deepseek/deepseek-chat`, demo-PR jossa viisi tahallista virhettä):
