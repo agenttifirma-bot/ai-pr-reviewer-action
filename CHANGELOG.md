@@ -2,7 +2,7 @@
 
 ## Julkaisematon
 
-- README: englanninkielinen pikaohje (käyttö, asetukset, turvallisuus lyhyesti); testimäärä korjattu 69:ään.
+- README: englanninkielinen pikaohje (käyttö, asetukset, turvallisuus lyhyesti).
 
 ## 0.1.1 (17.10.2026)
 
