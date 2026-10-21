@@ -2,6 +2,7 @@
 
 ## Julkaisematon
 
+- CI: Dependabotin patch/minor-päivitykset yhdistetään automaattisesti (major jää ihmiselle).
 - README: englanninkielinen pikaohje (käyttö, asetukset, turvallisuus lyhyesti).
 
 ## 0.1.1 (17.10.2026)
