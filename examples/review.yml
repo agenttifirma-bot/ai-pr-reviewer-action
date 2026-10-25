@@ -8,6 +8,10 @@ permissions:
   contents: read                # the Action never checks out or runs PR code
   pull-requests: write          # one comment, updated in place
 
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true      # a new push replaces the review still running for the old one
+
 jobs:
   review:
     runs-on: ubuntu-latest

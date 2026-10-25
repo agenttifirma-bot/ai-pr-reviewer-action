@@ -37,6 +37,7 @@ The Action does no `checkout`: it reads the changed files through the GitHub API
 | `api-key` | empty | Model key. Fork PRs get no secrets, so the Action then does nothing. |
 | `base-url` | required | OpenAI-compatible endpoint, `https` only. |
 | `model` | required | Model name. |
+| `github-token` | `${{ github.token }}` | Token for reading the PR files and writing one comment. The default is enough; override only if you need a different token. |
 | `max-input-tokens` | 20000 | Hard ceiling for the estimated input (max 100000). As many files as fit, smallest first; the rest are listed as "Not reviewed". |
 | `max-output-tokens` | 1500 | Hard ceiling for the reply (max 4000). |
 | `max-runs-per-pr` | 5 | Reviews per pull request across all pushes (max 20). |
@@ -77,6 +78,7 @@ Action ei tee `checkout`-vaihetta eikä tarvitse sitä: se lukee muuttuneet tied
 | `api-key` | (tyhjä) | Mallin avain. Fork-PR:issä GitHub ei anna salaisuuksia, jolloin Action ei tee mitään. |
 | `base-url` | (pakollinen) | OpenAI-yhteensopiva osoite, vain `https`. |
 | `model` | (pakollinen) | Mallin nimi. |
+| `github-token` | `${{ github.token }}` | Token PR:n tiedostojen lukemiseen ja yhden kommentin kirjoittamiseen. Oletus riittää; vaihda vain jos tarvitset toisen tokenin. |
 | `max-input-tokens` | 20 000 | Kova katto arvioidulle syötteelle (enintään 100 000). Mahdollisimman monta tiedostoa pienimmästä alkaen; loput listataan kommentissa "Not reviewed". |
 | `max-output-tokens` | 1 500 | Kova katto vastaukselle (enintään 4 000). |
 | `max-runs-per-pr` | 5 | Montako kertaa yhtä PR:ää tarkistetaan kaikkien pushien yli (enintään 20). |
