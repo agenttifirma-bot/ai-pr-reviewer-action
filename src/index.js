@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
-import { cost, estimateTokens, select } from "./budget.js";
+import { cost, select } from "./budget.js";
 import { addedLines, numberedPatch, skipReason } from "./diff.js";
 import { client, GitHubError } from "./github.js";
 import { DEFAULTS, HARD_CAPS } from "./limits.js";

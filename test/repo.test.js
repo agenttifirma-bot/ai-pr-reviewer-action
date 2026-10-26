@@ -57,3 +57,25 @@ test("limits are what the README promises", async () => {
   assert.equal(l.HARD_CAPS.maxInputTokens, 100_000);
   assert.equal(l.HARD_CAPS.maxOutputTokens, 4_000);
 });
+
+test("README documents every action.yml input (English and Finnish tables)", () => {
+  const y = read("action.yml");
+  const inputs = y.slice(y.indexOf("inputs:"), y.indexOf("\nruns:")).match(/^ {2}([a-z-]+):/gm).map((l) => l.trim().slice(0, -1));
+  assert.ok(inputs.includes("github-token"));
+  const readme = read("README.md");
+  const en = readme.slice(0, readme.indexOf("## Käyttö"));
+  const fi = readme.slice(readme.indexOf("## Asetukset"), readme.indexOf("## Turvamalli"));
+  for (const name of inputs) {
+    assert.ok(en.includes(`\`${name}\``), `${name} missing from English table`);
+    assert.ok(fi.includes(`\`${name}\``), `${name} missing from Finnish table`);
+  }
+});
+
+test("examples/review.yml cancels superseded runs per pull request", () => {
+  const y = read("examples/review.yml");
+  assert.match(y, /^concurrency:\n {2}group: .*pull_request\.number.*\n {2}cancel-in-progress: true/m);
+});
+
+test("src/index.js does not import estimateTokens (unused)", () => {
+  assert.ok(!/^import .*estimateTokens/m.test(read("src/index.js")));
+});
