@@ -71,6 +71,15 @@ jobs:
 
 Action ei tee `checkout`-vaihetta eikä tarvitse sitä: se lukee muuttuneet tiedostot GitHubin rajapinnasta.
 
+Asennus vaihe vaiheelta:
+
+1. Kopioi `examples/review.yml` kohteeseen `.github/workflows/ai-review.yml`.
+2. Lisää repositorion salaisuus `LLM_API_KEY` (mallin avain). Vaihda tarvittaessa `base-url` ja `model`; `base-url` on oltava `https`-osoite.
+3. Halutessasi kokeile ensin lisäämällä `with`-lohkoon `dry-run: "true"`: kommentti tulostuu työn lokiin eikä julkaista PR:ään. Poista rivi, kun tulos näyttää hyvältä.
+4. Avaa pull request. Action julkaisee yhden kommentin ja päivittää sitä paikallaan, kun PR:ään pushataan lisää (enintään `max-runs-per-pr` kertaa). Jos sama commit on jo tarkistettu, se ohitetaan.
+
+Esimerkkitiedosto estää myös päällekkäiset ajot (`concurrency`), jättää luonnos-PR:t väliin ja keskeyttää työn 5 minuutin kohdalla.
+
 ## Asetukset
 
 | Asetus | Oletus | Merkitys |
@@ -102,7 +111,9 @@ Katto on tokeneissa, ei dollareissa: tokenit tiedetään ennen kutsua, dollarihi
 
 - Malli voi olla väärässä ja jättää löytämättä asioita. Kommentti sanoo itse "can be wrong". Tarkistus lisäksi tarkastaa vain sijainnin, ei sitä onko väite totta.
 - Vain lisätyt rivit ja yksi mallikutsu. Ei repon muuta koodia kontekstina, ei rivikohtaisia kommentteja (yksi yhteenvetokommentti, päivitetään paikallaan), ei keskustelua eikä automaattisia korjauksia.
-- Suuri PR katkaistaan tokenkattoon: tiedostot, jotka eivät mahdu, näkyvät kommentin kohdassa "Not reviewed".
+- Suuri PR katkaistaan tokenkattoon: tiedostot, jotka eivät mahdu, näkyvät kommentin kohdassa "Not reviewed". Tiedostolistasta luetaan enintään 300 tiedostoa; loput merkitään tarkistamatta jääneiksi.
+- Kommentissa näytetään enintään 10 löydöstä, ja mallikutsun aikakatkaisu on 60 sekuntia. Jos kutsu epäonnistuu, kommenttia ei julkaista, eikä PR:ää estetä (paitsi jos `fail-on-error` on `true`).
+- Ilman `api-key`:tä (fork-PR) ei lähetetä mitään mihinkään.
 - GitHubin ajurit eivät näe yksityisverkon (esim. Tailscale) osoitteita. Käytä julkista https-osoitetta.
 - Tekijän testit käyttävät väärennettyä GitHubia ja mallia sekä paikallista HTTP-palvelinta. Oikea mallikokeilu on tehty (katso CHANGELOG): pieni kehote vaikuttaa paljon, ja malli jättää silti osan virheistä löytämättä.
 
@@ -120,11 +131,13 @@ Tämä ei kilpaile ominaisuuksilla. Se on tarkoituksella pieni ja tekee kolme as
 
 ## Kehitys
 
+Vaatii Node.js 22 tai uudemman (`engines` kohdassa `package.json`); CI ajaa testit Node 22:lla ja 24:llä. Asennettavaa ei ole, koska riippuvuuksia ei ole.
+
 ```bash
-npm test      # node --test
+npm test      # node --test "test/*.test.js"
 ```
 
-68 testiä ajetaan ilman verkkoa ja ilman avaimia. Lisäksi 47 tarkoituksella rikottua kohtaa lähdekoodissa (esim. rajan poisto, siivouksen ohitus, redirectin seuranta) kaatuu testeihin; ensimmäisellä kierroksella kuusi selvisi, ja ne paikattiin testeillä.
+78 testiä ajetaan ilman verkkoa ja ilman avaimia. Lisäksi 47 tarkoituksella rikottua kohtaa lähdekoodissa (esim. rajan poisto, siivouksen ohitus, redirectin seuranta) kaatuu testeihin; ensimmäisellä kierroksella kuusi selvisi, ja ne paikattiin testeillä.
 
 ## Lisenssi
 
