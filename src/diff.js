@@ -26,7 +26,7 @@ export function addedLines(patch) {
   return added;
 }
 
-const SKIP_PATH = /(^|\/)(\.env[^/]*|[^/]*\.(pem|key|p12|pfx|crt|cer)|id_(rsa|ed25519|ecdsa)[^/]*|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|[^/]*\.min\.(js|css)|[^/]*\.(png|jpe?g|gif|webp|ico|pdf|zip|gz|tgz|woff2?|ttf|eot|mp[34]|mov))$/i;
+const SKIP_PATH = /(^|\/)(\.env[^/]*|[^/]*\.(pem|key|p12|pfx|crt|cer)|id_(rsa|ed25519|ecdsa)[^/]*|credentials\.json|secrets\.ya?ml|\.npmrc|\.netrc|\.htpasswd|[^/]*\.(tfvars|tfstate|jks|keystore|p8|kdbx)|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|[^/]*\.min\.(js|css)|[^/]*\.(png|jpe?g|gif|webp|ico|pdf|zip|gz|tgz|woff2?|ttf|eot|mp[34]|mov))$/i;
 
 /** Files that are never sent to the model: secrets-like, generated, binary. */
 export function skipReason(file) {
