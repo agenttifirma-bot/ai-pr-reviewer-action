@@ -140,7 +140,7 @@ test("dry-run posts nothing", async () => {
   assert.ok(r.body.includes("Automated AI review"));
 });
 
-test("model failure never blocks the PR (exit 0) unless fail-on-error is set; no comment is posted", async () => {
+test("model failure never blocks the PR (exit 0) unless fail-on-error is set; only the run reservation is posted", async () => {
   const net = fakeNet({ reply: okReply(), llmStatus: 500 });
   const orig = globalThis.fetch;
   globalThis.fetch = net.fetchImpl;
@@ -154,7 +154,8 @@ test("model failure never blocks the PR (exit 0) unless fail-on-error is set; no
     globalThis.fetch = orig;
     console.log = origLog;
   }
-  assert.equal(net.state.comments.length, 0);
+  assert.equal(net.state.comments.length, 1);
+  assert.match(net.state.comments[0].body, /Review in progress/);
   assert.ok(lines.some((l) => l.includes("llm_http_500")));
 });
 
@@ -202,4 +203,38 @@ test("a PR with more than 300 files says that part was not reviewed", async () =
   const net = fakeNet({ files, reply: okReply([]) });
   await go(net, baseEnv({ "INPUT_MAX-INPUT-TOKENS": "100000" }));
   assert.match(net.state.comments[0].body, /files beyond the first 300/);
+});
+
+test("missing pull-requests: write stops the job before any LLM call", async () => {
+  const net = fakeNet({ reply: okReply() });
+  const inner = net.fetchImpl;
+  const denied = async (url, init = {}) => (init.method === "POST" || init.method === "PATCH" ? (net.calls.push({ url: String(url), method: init.method }), new Response("{}", { status: 403 })) : inner(url, init));
+  await assert.rejects(run({ env: baseEnv(), fetchImpl: denied, log: silent }), (e) => e.code === "github_http_403");
+  assert.equal(net.llmCalls().length, 0);
+});
+
+test("failed comment write on a repeated push never reaches the LLM, so the run count cannot be dodged", async () => {
+  const old = { id: 5, user: { type: "Bot" }, body: marker(SHA2, 1) + "\nold review" };
+  const net = fakeNet({ comments: [old], reply: okReply() });
+  const inner = net.fetchImpl;
+  const denied = async (url, init = {}) => (init.method === "PATCH" ? new Response("{}", { status: 403 }) : inner(url, init));
+  await assert.rejects(run({ env: baseEnv(), fetchImpl: denied, log: silent }), (e) => e.code === "github_http_403");
+  assert.equal(net.llmCalls().length, 0);
+});
+
+test("the run is counted before the model call, so a failing model still hits the run limit", async () => {
+  const net = fakeNet({ reply: okReply(), llmStatus: 500 });
+  const env = (sha) => baseEnv({ GITHUB_EVENT_PATH: eventFile({ sha }), "INPUT_MAX-RUNS-PER-PR": "2" });
+  await assert.rejects(go(net, env(SHA)));
+  await assert.rejects(go(net, env(SHA2)));
+  assert.equal((await go(net, env("c".repeat(40)))).outcome, "skipped_run_limit");
+  assert.equal(net.llmCalls().length, 2);
+});
+
+test("reservation keeps the previous review text until the new one replaces it", async () => {
+  const old = { id: 5, user: { type: "Bot" }, body: marker(SHA2, 1) + "\nold review text" };
+  const net = fakeNet({ comments: [old], reply: okReply(), llmStatus: 500 });
+  await assert.rejects(go(net));
+  assert.ok(net.state.comments[0].body.startsWith(marker(SHA2, 2)));
+  assert.match(net.state.comments[0].body, /old review text/);
 });

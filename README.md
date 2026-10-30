@@ -38,7 +38,7 @@ The Action does no `checkout`: it reads the changed files through the GitHub API
 | `base-url` | required | OpenAI-compatible endpoint, `https` only. |
 | `model` | required | Model name. |
 | `github-token` | `${{ github.token }}` | Token for reading the PR files and writing one comment. The default is enough; override only if you need a different token. |
-| `max-input-tokens` | 20000 | Hard ceiling for the estimated input (max 100000). As many files as fit, smallest first; the rest are listed as "Not reviewed". |
+| `max-input-tokens` | 20000 | Ceiling for the *estimated* input (max 100000; 3 characters per token, which holds for typical code and English but under-counts non-ASCII text such as CJK or emoji, where the real count can be higher). As many files as fit, smallest first; the rest are listed as "Not reviewed". |
 | `max-output-tokens` | 1500 | Hard ceiling for the reply (max 4000). |
 | `max-runs-per-pr` | 5 | Reviews per pull request across all pushes (max 20). |
 | `price-in`, `price-out` | 0 | USD per million tokens, only for the cost estimate in the comment. |
@@ -79,12 +79,14 @@ Action ei tee `checkout`-vaihetta eikä tarvitse sitä: se lukee muuttuneet tied
 | `base-url` | (pakollinen) | OpenAI-yhteensopiva osoite, vain `https`. |
 | `model` | (pakollinen) | Mallin nimi. |
 | `github-token` | `${{ github.token }}` | Token PR:n tiedostojen lukemiseen ja yhden kommentin kirjoittamiseen. Oletus riittää; vaihda vain jos tarvitset toisen tokenin. |
-| `max-input-tokens` | 20 000 | Kova katto arvioidulle syötteelle (enintään 100 000). Mahdollisimman monta tiedostoa pienimmästä alkaen; loput listataan kommentissa "Not reviewed". |
+| `max-input-tokens` | 20 000 | Katto arvioidulle syötteelle (enintään 100 000). Arvio on 3 merkkiä/token, joka sopii koodille ja englannille mutta aliarvioi ei-ASCII-tekstin (esim. kiina, emoji), jolloin todellinen määrä voi ylittää arvion. Järjestelmäpromptin todellinen pituus lasketaan mukaan. Mahdollisimman monta tiedostoa pienimmästä alkaen; loput listataan kommentissa "Not reviewed". |
 | `max-output-tokens` | 1 500 | Kova katto vastaukselle (enintään 4 000). |
 | `max-runs-per-pr` | 5 | Montako kertaa yhtä PR:ää tarkistetaan kaikkien pushien yli (enintään 20). |
 | `price-in`, `price-out` | 0 | Hinta dollareina miljoonaa tokenia kohden. Vain kustannusarvioon kommentin alariville. |
 | `dry-run` | `false` | `true` tulostaa kommentin lokiin eikä julkaise sitä. |
 | `fail-on-error` | `false` | Oletuksena virhe ei koskaan estä PR:ää. |
+
+Ajoraja: kommentti varataan (merkitään ajokerta) ennen mallikutsua. Jos kirjoitus epäonnistuu (esim. `pull-requests: write` puuttuu), työ päättyy ennen mallikutsua eikä maksullista kutsua tehdä.
 
 Katto on tokeneissa, ei dollareissa: tokenit tiedetään ennen kutsua, dollarihinnat eivät. Hinnat annetaan vain arviota varten.
 
