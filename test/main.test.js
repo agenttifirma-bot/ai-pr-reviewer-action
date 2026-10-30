@@ -43,12 +43,13 @@ test("main: config errors exit 1 with an ::error:: line, even without fail-on-er
   assert.equal(net.calls.length, 0);
 });
 
-test("main: a malformed model reply is a known error code, posts nothing, exits 0", async () => {
+test("main: a malformed model reply is a known error code, posts no review, exits 0", async () => {
   const net = fakeNet({ reply: "I cannot answer in JSON" });
   const { code, lines } = await runMain(net, baseEnv());
   assert.equal(code, 0);
   assert.ok(lines.some((l) => l.startsWith("::warning::") && l.includes("model_reply_no_json") && l.includes("no review posted")));
-  assert.equal(net.state.comments.length, 0);
+  assert.equal(net.state.comments.length, 1);
+  assert.match(net.state.comments[0].body, /Review in progress/);
 });
 
 test("main: GitHub API failures are reported by code and honour fail-on-error", async () => {

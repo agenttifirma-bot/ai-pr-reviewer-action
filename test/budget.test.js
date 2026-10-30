@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { cost, estimateTokens, select } from "../src/budget.js";
-import { PROMPT_OVERHEAD_TOKENS } from "../src/limits.js";
+import { cost, estimateTokens, overheadTokens, select } from "../src/budget.js";
+import { FRAMING_CHARS } from "../src/limits.js";
+import { SYSTEM_PROMPT } from "../src/prompt.js";
+
+const PROMPT_OVERHEAD_TOKENS = overheadTokens();
 
 const f = (filename, n) => ({ filename, text: "x".repeat(n) });
 
@@ -39,4 +42,17 @@ test("select prefers many small files over one big one, whatever the names are",
   const r = select([f("a.js", 900), f("b.js", 300), f("c.js", 300)], PROMPT_OVERHEAD_TOKENS + 340);
   assert.deepEqual(r.kept.map((x) => x.filename), ["b.js", "c.js"]);
   assert.deepEqual(r.skipped.map((x) => x.filename), ["a.js"]);
+});
+
+test("overhead is computed from the real system prompt, not a fixed number", () => {
+  assert.equal(overheadTokens(SYSTEM_PROMPT), estimateTokens(SYSTEM_PROMPT.length + FRAMING_CHARS));
+  assert.ok(overheadTokens("x".repeat(30000)) > overheadTokens("x".repeat(300)));
+  assert.ok(overheadTokens() > estimateTokens(SYSTEM_PROMPT.length));
+});
+
+test("select reserves the overhead of the given prompt length", () => {
+  const big = overheadTokens("x".repeat(9000));
+  const r = select([f("a.js", 300)], big + 10, big);
+  assert.equal(r.kept.length, 0);
+  assert.equal(select([f("a.js", 300)], big + 200, big).inputTokens, big + estimateTokens(300 + 4 + 40));
 });
