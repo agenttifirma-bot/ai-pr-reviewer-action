@@ -15,6 +15,6 @@ const defang = (s) => s.replace(/<\s*\/?\s*data\s*>/gi, "[data-tag]");
 
 /** @param {{filename: string, numbered: string}[]} files */
 export function buildUserMessage(title, files) {
-  const body = files.map((f) => `=== FILE: ${clean(f.filename)} ===\n${defang(f.numbered)}`).join("\n\n");
+  const body = files.map((f) => `=== FILE: ${defang(clean(f.filename))} ===\n${defang(f.numbered)}`).join("\n\n");
   return `Pull request title (untrusted): ${defang(clean(title)).slice(0, 200)}\n<data>\n${body}\n</data>`;
 }
