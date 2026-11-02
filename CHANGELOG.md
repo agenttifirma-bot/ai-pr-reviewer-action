@@ -2,8 +2,20 @@
 
 ## Julkaisematon
 
+## 0.1.2 (2.11.2026)
+
+Korjattu (tietoturva):
+
+- Redaktio tunnistaa nyt myös lainatut avainnimet (esim. `"api_key": "..."`), joten lainausmerkeissä oleva salaisuus ei enää päädy malliin (e840a99).
+- Tiedostonimi puhdistetaan (defang) ennen kehotteeseen liittämistä, jotta nimeen upotettu ohje ei pääse rikkomaan `<data>`-lohkoa (e840a99).
+- Ohitettavien tiedostojen luetteloon lisättiin salaisuustyyppejä: `credentials.json`, `secrets.yml`, `.npmrc`, `.netrc`, `.htpasswd`, `*.tfvars`, `*.tfstate`, `*.jks`, `*.keystore`, `*.p8`, `*.kdbx` (e840a99).
+- Ajokerta varataan ennen mallikutsua. Jos kommentin kirjoitus epäonnistuu (esim. `pull-requests: write` puuttuu), työ päättyy ennen maksullista kutsua (8b72e01).
+- Syöttökattoon lasketaan järjestelmäkehotteen todellinen pituus kiinteän arvion sijaan (8b72e01).
+
+Muuta:
+
 - CI: Dependabotin patch/minor-päivitykset yhdistetään automaattisesti (major jää ihmiselle).
-- README: englanninkielinen pikaohje (käyttö, asetukset, turvallisuus lyhyesti).
+- README: englanninkielinen pikaohje, päivitetty testimäärä (87) ja versioviittaus `@v0.1.2`.
 
 ## 0.1.1 (17.10.2026)
 

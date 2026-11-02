@@ -23,7 +23,7 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.1
+      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.2
         with:
           api-key: ${{ secrets.LLM_API_KEY }}
           base-url: https://openrouter.ai/api/v1
@@ -62,7 +62,7 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.1
+      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.2
         with:
           api-key: ${{ secrets.LLM_API_KEY }}
           base-url: https://openrouter.ai/api/v1
