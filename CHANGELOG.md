@@ -2,6 +2,10 @@
 
 ## Julkaisematon
 
+Korjattu (tietoturva):
+
+- Turvallisuus: syöte normalisoidaan ennen erottimen tarkistusta (näkymättömät merkit ja Unicode tag -merkit pois, NFKC, leveät ja koristeelliset kulmasulut tavallisiksi). Sulkee kolme PR #12:ssa kirjattua aukkoa. Julkaisematon.
+
 Muuta:
 
 - Marketplace-valmius: `action.yml`:n nimi on "Budgeted AI PR Reviewer", kuvaus on alle 125 merkkiä, ja esimerkin versioviite (`examples/review.yml`) on `@v0.1.2`. Uudet testit tarkistavat nimen, kuvauksen pituuden, brändäyksen ja versioviitteet.
