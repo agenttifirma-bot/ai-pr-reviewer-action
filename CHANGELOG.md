@@ -2,6 +2,7 @@
 
 ## Julkaisematon
 
+- Turvallisuus: syöte normalisoidaan ennen erottimen tarkistusta (näkymättömät merkit ja Unicode tag -merkit pois, NFKC, leveät ja koristeelliset kulmasulut tavallisiksi). Sulkee kolme PR #12:ssa kirjattua aukkoa. Julkaisematon.
 - CI: Dependabotin patch/minor-päivitykset yhdistetään automaattisesti (major jää ihmiselle).
 - README: englanninkielinen pikaohje (käyttö, asetukset, turvallisuus lyhyesti).
 

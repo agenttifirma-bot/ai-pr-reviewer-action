@@ -9,9 +9,27 @@ Work in two steps inside the same JSON object. First fill "analysis": under 120 
 Reply with ONLY this JSON object:
 {"result": "ok" | "unknown", "analysis": "<your notes, under 120 words>", "summary": "<one or two sentences>", "reason": "<only when unknown>", "findings": [{"file": "<path>", "line": <number>, "severity": "high" | "medium" | "low", "confidence": "high" | "medium", "message": "<what is wrong and why, one or two sentences>"}]}`;
 
+// Invisible characters that can hide or split text: zero-width and bidi marks (U+200B-U+200F),
+// word joiner and invisible operators (U+2060-U+2064), BOM (U+FEFF), soft hyphen (U+00AD),
+// Unicode tag characters (U+E0000-U+E007F).
+const INVISIBLE = /[\u00ad\u200b-\u200f\u2060-\u2064\ufeff\u{e0000}-\u{e007f}]/gu;
+// Angle bracket look-alikes that NFKC does not fold to "<" and ">".
+const OPEN_BRACKETS = /[\u2039\u2329\u27e8\u276c\u2770\u3008\u300a\u29fc\ufe64\uff1c]/g;
+const CLOSE_BRACKETS = /[\u203a\u232a\u27e9\u276d\u2771\u3009\u300b\u29fd\ufe65\uff1e]/g;
+
+/** Normalizes untrusted text before the delimiter check: strips invisible characters, applies NFKC and folds bracket look-alikes. */
+export function normalize(s) {
+  return String(s)
+    .replace(INVISIBLE, "")
+    .normalize("NFKC")
+    .replace(INVISIBLE, "")
+    .replace(OPEN_BRACKETS, "<")
+    .replace(CLOSE_BRACKETS, ">");
+}
+
 const clean = (s) => String(s).replace(/[\u0000-\u001f\u007f]+/g, " ").trim();
 // the data block cannot be closed from inside
-const defang = (s) => s.replace(/<\s*\/?\s*data\s*>/gi, "[data-tag]");
+const defang = (s) => normalize(s).replace(/<\s*\/?\s*data\s*>/gi, "[data-tag]");
 
 /** @param {{filename: string, numbered: string}[]} files */
 export function buildUserMessage(title, files) {

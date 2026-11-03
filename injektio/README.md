@@ -45,6 +45,6 @@ Huom: `chat()` hyvaksyy vain https-osoitteen tai localhostin. Paikallinen http-L
 
 `naiivi`, `kestava` ja `lainaava` ovat koodia, ei malleja. Ne todentavat, etta mittari erottaa tottelemisen pitamisesta ja etta koodin puolustukset (linkkien poisto, verkkorajat, suodatus) pitavat silloinkin kun malli tottelee. Mallitulokset tulevat vasta elavasta ajosta.
 
-## Tunnetut aukot (3 kpl, `todo`-testeina)
+## Aiemmin tunnetut aukot (korjattu)
 
-Koodin `defang` poistaa vain tasmalliset `</data>`-muodot. Seuraavat menevat mallille sellaisenaan: `</data` + nollaleveysmerkki + `>`, leveat kulmasulut, Unicode tag -merkit (nakymattomia ihmiselle). Onko niista haittaa, riippuu mallista (mittaa elavalla ajolla). Korjausehdotukset ovat testien `todo`-viesteissa; korjausta ei tehty tassa PR:ssa.
+PR #12 kirjasi kolme aukkoa `todo`-testeina: `</data` + nollaleveysmerkki + `>`, leveat kulmasulut ja Unicode tag -merkit. `normalize()` (`src/prompt.js`) poistaa nakymattomat merkit (U+00AD, U+200B-U+200F, U+2060-U+2064, U+FEFF, U+E0000-U+E007F), ajaa NFKC-normalisoinnin ja muuntaa koristeelliset kulmasulut tavallisiksi ennen `defang`-tarkistusta. Testit ovat nyt tavallisia testeja. Sivuvaikutus: tag-merkkeihin piilotettu ohje (`piilo-02-unicode-tagit`) ei enaa paase mallille, joten naiivi keinomalli ei sita tottele. NFKC voi muuttaa myos tavallisen koodin yhteensopivuusmerkkeja (esim. `²` -> `2`, leveat kirjaimet); sen vuoksi tavallisen koodin muuttumattomuus on testattu.
