@@ -1,5 +1,5 @@
-name: "AI PR reviewer (budgeted, abstains)"
-description: "AI pull request review with a hard token ceiling, an explicit 'I do not know' answer and no access to PR code or secrets. Works with any OpenAI-compatible endpoint."
+name: "Budgeted AI PR Reviewer"
+description: "AI pull request review with a hard token ceiling and an explicit 'I do not know' answer. Never reads PR code or secrets."
 author: "Tony Weckström"
 branding:
   icon: "shield"
