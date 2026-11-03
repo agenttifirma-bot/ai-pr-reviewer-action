@@ -47,6 +47,10 @@ The Action does no `checkout`: it reads the changed files through the GitHub API
 
 Safety in short: it refuses `pull_request_target`, never runs or writes PR code, redacts secret-like strings and skips `.env`, key, lock and binary files before anything is sent, wraps the diff as data without tools, and only keeps findings that point at added lines the model was actually shown. The model may answer `unknown`, and the comment then says so. The token ceilings and run limits live in code, not in the prompt. Details (in Finnish) are in the sections below. The model can be wrong; the check verifies the location of a finding, not whether the claim is true.
 
+## Prompt injection -testisarja
+
+Katso [`injektio/README.md`](injektio/README.md): 19 tapausta (OWASP LLM01/LLM06), kanariamittari ja ajuri, joka kirjaa tulokset `kokeilut.jsonl`-muotoon.
+
 ## Käyttö
 
 Kopioi [`examples/review.yml`](examples/review.yml) repositoriosi kansioon `.github/workflows/` ja lisää salaisuus `LLM_API_KEY`:
