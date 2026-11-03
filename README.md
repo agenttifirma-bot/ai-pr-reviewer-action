@@ -23,7 +23,7 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.1
+      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.2
         with:
           api-key: ${{ secrets.LLM_API_KEY }}
           base-url: https://openrouter.ai/api/v1
@@ -66,7 +66,7 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.1
+      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.2
         with:
           api-key: ${{ secrets.LLM_API_KEY }}
           base-url: https://openrouter.ai/api/v1
@@ -130,7 +130,7 @@ Tämä ei kilpaile ominaisuuksilla. Se on tarkoituksella pieni ja tekee kolme as
 npm test      # node --test
 ```
 
-68 testiä ajetaan ilman verkkoa ja ilman avaimia. Lisäksi 47 tarkoituksella rikottua kohtaa lähdekoodissa (esim. rajan poisto, siivouksen ohitus, redirectin seuranta) kaatuu testeihin; ensimmäisellä kierroksella kuusi selvisi, ja ne paikattiin testeillä.
+89 testiä ajetaan ilman verkkoa ja ilman avaimia. Lisäksi 47 tarkoituksella rikottua kohtaa lähdekoodissa (esim. rajan poisto, siivouksen ohitus, redirectin seuranta) kaatuu testeihin; ensimmäisellä kierroksella kuusi selvisi, ja ne paikattiin testeillä.
 
 ## Lisenssi
 
