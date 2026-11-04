@@ -79,3 +79,23 @@ test("examples/review.yml cancels superseded runs per pull request", () => {
 test("src/index.js does not import estimateTokens (unused)", () => {
   assert.ok(!/^import .*estimateTokens/m.test(read("src/index.js")));
 });
+
+test("action.yml: Marketplace requirements (name, short description, branding, quoted top-level scalars)", () => {
+  const y = read("action.yml");
+  const top = (key) => new RegExp(`^${key}: "([^"\\n]*)"$`, "m").exec(y);
+  // Quoted scalars keep ':' and quotes in text from breaking the YAML (earlier mcp-doctor incident).
+  const name = top("name"), desc = top("description");
+  assert.ok(name && name[1].length >= 3, "name must be a double-quoted string");
+  assert.ok(desc, "description must be a double-quoted single-line string");
+  assert.ok(desc[1].length <= 125, `description is ${desc[1].length} chars, Marketplace allows 125`);
+  assert.match(y, /^branding:\n  icon: "[a-z-]+"\n  color: "(white|black|yellow|blue|green|orange|red|purple|gray-dark)"$/m);
+});
+
+test("examples and README Action references use the package.json version", () => {
+  const v = JSON.parse(read("package.json")).version;
+  for (const f of ["README.md", "examples/review.yml"]) {
+    const refs = [...read(f).matchAll(/ai-pr-reviewer-action@(v[\d.]+)/g)].map((m) => m[1]);
+    assert.ok(refs.length > 0, f);
+    for (const r of refs) assert.equal(r, `v${v}`, f);
+  }
+});

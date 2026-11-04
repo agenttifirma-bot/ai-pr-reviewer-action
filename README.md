@@ -23,7 +23,7 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.1
+      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.2
         with:
           api-key: ${{ secrets.LLM_API_KEY }}
           base-url: https://openrouter.ai/api/v1
@@ -38,7 +38,7 @@ The Action does no `checkout`: it reads the changed files through the GitHub API
 | `base-url` | required | OpenAI-compatible endpoint, `https` only. |
 | `model` | required | Model name. |
 | `github-token` | `${{ github.token }}` | Token for reading the PR files and writing one comment. The default is enough; override only if you need a different token. |
-| `max-input-tokens` | 20000 | Hard ceiling for the estimated input (max 100000). As many files as fit, smallest first; the rest are listed as "Not reviewed". |
+| `max-input-tokens` | 20000 | Ceiling for the *estimated* input (max 100000; 3 characters per token, which holds for typical code and English but under-counts non-ASCII text such as CJK or emoji, where the real count can be higher). As many files as fit, smallest first; the rest are listed as "Not reviewed". |
 | `max-output-tokens` | 1500 | Hard ceiling for the reply (max 4000). |
 | `max-runs-per-pr` | 5 | Reviews per pull request across all pushes (max 20). |
 | `price-in`, `price-out` | 0 | USD per million tokens, only for the cost estimate in the comment. |
@@ -46,6 +46,10 @@ The Action does no `checkout`: it reads the changed files through the GitHub API
 | `fail-on-error` | `false` | By default an error never blocks the PR. |
 
 Safety in short: it refuses `pull_request_target`, never runs or writes PR code, redacts secret-like strings and skips `.env`, key, lock and binary files before anything is sent, wraps the diff as data without tools, and only keeps findings that point at added lines the model was actually shown. The model may answer `unknown`, and the comment then says so. The token ceilings and run limits live in code, not in the prompt. Details (in Finnish) are in the sections below. The model can be wrong; the check verifies the location of a finding, not whether the claim is true.
+
+## Prompt injection -testisarja
+
+Katso [`injektio/README.md`](injektio/README.md): 19 tapausta (OWASP LLM01/LLM06), kanariamittari ja ajuri, joka kirjaa tulokset `kokeilut.jsonl`-muotoon.
 
 ## Käyttö
 
@@ -62,7 +66,7 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.1
+      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.2
         with:
           api-key: ${{ secrets.LLM_API_KEY }}
           base-url: https://openrouter.ai/api/v1
@@ -88,12 +92,14 @@ Esimerkkitiedosto estää myös päällekkäiset ajot (`concurrency`), jättää
 | `base-url` | (pakollinen) | OpenAI-yhteensopiva osoite, vain `https`. |
 | `model` | (pakollinen) | Mallin nimi. |
 | `github-token` | `${{ github.token }}` | Token PR:n tiedostojen lukemiseen ja yhden kommentin kirjoittamiseen. Oletus riittää; vaihda vain jos tarvitset toisen tokenin. |
-| `max-input-tokens` | 20 000 | Kova katto arvioidulle syötteelle (enintään 100 000). Mahdollisimman monta tiedostoa pienimmästä alkaen; loput listataan kommentissa "Not reviewed". |
+| `max-input-tokens` | 20 000 | Katto arvioidulle syötteelle (enintään 100 000). Arvio on 3 merkkiä/token, joka sopii koodille ja englannille mutta aliarvioi ei-ASCII-tekstin (esim. kiina, emoji), jolloin todellinen määrä voi ylittää arvion. Järjestelmäpromptin todellinen pituus lasketaan mukaan. Mahdollisimman monta tiedostoa pienimmästä alkaen; loput listataan kommentissa "Not reviewed". |
 | `max-output-tokens` | 1 500 | Kova katto vastaukselle (enintään 4 000). |
 | `max-runs-per-pr` | 5 | Montako kertaa yhtä PR:ää tarkistetaan kaikkien pushien yli (enintään 20). |
 | `price-in`, `price-out` | 0 | Hinta dollareina miljoonaa tokenia kohden. Vain kustannusarvioon kommentin alariville. |
 | `dry-run` | `false` | `true` tulostaa kommentin lokiin eikä julkaise sitä. |
 | `fail-on-error` | `false` | Oletuksena virhe ei koskaan estä PR:ää. |
+
+Ajoraja: kommentti varataan (merkitään ajokerta) ennen mallikutsua. Jos kirjoitus epäonnistuu (esim. `pull-requests: write` puuttuu), työ päättyy ennen mallikutsua eikä maksullista kutsua tehdä.
 
 Katto on tokeneissa, ei dollareissa: tokenit tiedetään ennen kutsua, dollarihinnat eivät. Hinnat annetaan vain arviota varten.
 
@@ -137,7 +143,7 @@ Vaatii Node.js 22 tai uudemman (`engines` kohdassa `package.json`); CI ajaa test
 npm test      # node --test "test/*.test.js"
 ```
 
-78 testiä ajetaan ilman verkkoa ja ilman avaimia. Lisäksi 47 tarkoituksella rikottua kohtaa lähdekoodissa (esim. rajan poisto, siivouksen ohitus, redirectin seuranta) kaatuu testeihin; ensimmäisellä kierroksella kuusi selvisi, ja ne paikattiin testeillä.
+130 testiä ajetaan ilman verkkoa ja ilman avaimia. Lisäksi 47 tarkoituksella rikottua kohtaa lähdekoodissa (esim. rajan poisto, siivouksen ohitus, redirectin seuranta) kaatuu testeihin; ensimmäisellä kierroksella kuusi selvisi, ja ne paikattiin testeillä.
 
 ## Lisenssi
 

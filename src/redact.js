@@ -11,7 +11,7 @@ const RULES = [
   [/\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g, "[REDACTED jwt]"],
   [/\bBearer\s+[A-Za-z0-9._~+/-]{20,}=*/g, "Bearer [REDACTED]"],
 ];
-const ASSIGNMENT = /\b([A-Za-z0-9_]*(?:key|token|secret|password|passwd|pwd)[A-Za-z0-9_]*)(\s*[:=]\s*)(["']?)([^\s"',;]{6,})\3/gi;
+const ASSIGNMENT = /\b([A-Za-z0-9_]*(?:key|token|secret|password|passwd|pwd)[A-Za-z0-9_]*)(["']?)(\s*[:=]\s*)(["']?)([^\s"',;]{6,})\4/gi;
 
 /** @returns {{text: string, count: number}} */
 export function redact(text) {
@@ -23,10 +23,10 @@ export function redact(text) {
       return label;
     });
   }
-  out = out.replace(ASSIGNMENT, (m, name, sep, q, value) => {
+  out = out.replace(ASSIGNMENT, (m, name, nameQ, sep, q, value) => {
     if (value.startsWith("[REDACTED")) return m;
     count += 1;
-    return `${name}${sep}${q}[REDACTED]${q}`;
+    return `${name}${nameQ}${sep}${q}[REDACTED]${q}`;
   });
   return { text: out, count };
 }

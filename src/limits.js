@@ -8,7 +8,7 @@ export const MAX_REASON_CHARS = 200;
 export const MAX_RESPONSE_BYTES = 200_000;
 export const TIMEOUT_MS = 60_000;
 export const CHARS_PER_TOKEN = 3;           // conservative: real code is ~3.5-4 chars/token
-export const PROMPT_OVERHEAD_TOKENS = 600;  // system prompt + framing
+export const FRAMING_CHARS = 400;          // user-message framing: title line, <data> tags, separators (title is cut at 200)
 export const DEFAULTS = {
   maxInputTokens: 20_000,
   maxOutputTokens: 1_500,

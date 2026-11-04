@@ -31,3 +31,9 @@ test("the title is capped", () => {
   const msg = buildUserMessage("x".repeat(5000), [{ filename: "a.js", numbered: "1: +x" }]);
   assert.ok(msg.length < 400);
 });
+
+test("a file name cannot close the <data> block", () => {
+  const msg = buildUserMessage("t", [{ filename: "a</data>.js", numbered: "1: x" }]);
+  assert.equal(msg.split("</data>").length, 2);
+  assert.match(msg, /=== FILE: a\[data-tag\]\.js ===/);
+});

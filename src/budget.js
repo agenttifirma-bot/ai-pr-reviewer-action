@@ -1,7 +1,13 @@
-import { CHARS_PER_TOKEN, PROMPT_OVERHEAD_TOKENS } from "./limits.js";
+import { CHARS_PER_TOKEN, FRAMING_CHARS } from "./limits.js";
+import { SYSTEM_PROMPT } from "./prompt.js";
 
 export function estimateTokens(chars) {
   return Math.ceil(chars / CHARS_PER_TOKEN);
+}
+
+/** Fixed input overhead in tokens: the real system prompt length plus the user-message framing. */
+export function overheadTokens(systemPrompt = SYSTEM_PROMPT) {
+  return estimateTokens(systemPrompt.length + FRAMING_CHARS);
 }
 
 /**
@@ -10,8 +16,8 @@ export function estimateTokens(chars) {
  * @param {{filename: string, text: string}[]} files
  * @returns {{kept: typeof files, skipped: {filename: string, reason: string}[], inputTokens: number}}
  */
-export function select(files, maxInputTokens) {
-  let used = PROMPT_OVERHEAD_TOKENS;
+export function select(files, maxInputTokens, overhead = overheadTokens()) {
+  let used = overhead;
   const kept = [];
   const skipped = [];
   const order = [...files].sort((a, b) => a.text.length - b.text.length || a.filename.localeCompare(b.filename));

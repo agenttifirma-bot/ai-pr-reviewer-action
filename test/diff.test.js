@@ -39,3 +39,11 @@ test("skipReason: secrets-like, lockfiles, binary, removed and empty patches are
   assert.notEqual(skipReason(f("a.js", { patch: undefined })), null);
   assert.notEqual(skipReason(null), null);
 });
+
+test("skipReason: more credential files are never sent", () => {
+  const names = ["credentials.json", "config/secrets.yml", "secrets.yaml", ".npmrc", "a/.netrc", ".htpasswd", "prod.tfvars", "terraform.tfstate", "x.jks", "app.keystore", "AuthKey.p8", "db.kdbx"];
+  for (const filename of names) {
+    assert.equal(skipReason({ filename, status: "modified", patch: "@@ -1 +1 @@\n+x" }), "excluded file type", filename);
+  }
+  assert.equal(skipReason({ filename: "src/secrets.js", status: "modified", patch: "@@ -1 +1 @@\n+x" }), null);
+});

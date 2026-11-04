@@ -10,6 +10,9 @@ import { redact } from "./redact.js";
 import { marker, parseMarker, render } from "./render.js";
 import { extractJson, validate, ValidationError } from "./validate.js";
 
+// Marker sha of a reservation comment that holds a run count but no review yet; never equals a real head sha.
+const PENDING_SHA = "0".repeat(40);
+
 export class ConfigError extends Error {
   constructor(code) {
     super(code);
@@ -103,6 +106,19 @@ export async function run({ env = process.env, fetchImpl = fetch, log = console 
     return { filename: p.filename, numbered: r.text };
   });
 
+  // Reserve the run before the paid call: this write doubles as the permission check (pull-requests: write).
+  // If it fails, GitHubError stops the job before any LLM call, so a missing permission cannot cost money on every push.
+  let commentId = mine?.id;
+  if (!dryRun) {
+    if (mine) {
+      const rest = mine.body.slice(mine.body.indexOf("\n") + 1);
+      await gh.update(owner, repo, mine.id, `${marker(prev.sha, runs)}\n${rest}`);
+    } else {
+      const created = await gh.create(owner, repo, number, `${marker(PENDING_SHA, runs)}\n## Automated AI review (can be wrong)\n\nReview in progress. If this text stays, the model call failed; the next push retries.`);
+      commentId = created?.id;
+    }
+  }
+
   const reply = await chat({
     baseUrl, apiKey, model, fetchImpl,
     system: SYSTEM_PROMPT,
@@ -117,7 +133,7 @@ export async function run({ env = process.env, fetchImpl = fetch, log = console 
     log.log(body);
     return { outcome: "dry_run", body, review };
   }
-  if (mine) await gh.update(owner, repo, mine.id, body);
+  if (commentId !== undefined) await gh.update(owner, repo, commentId, body);
   else await gh.create(owner, repo, number, body);
   return { outcome: "reviewed", review, findings: review.findings.length };
 }

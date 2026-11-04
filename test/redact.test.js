@@ -51,3 +51,13 @@ test("a value already redacted by a token rule is not counted or relabelled twic
     assert.ok(!r.text.includes("api key] "), code);
   }
 });
+
+test("redacts values of quoted key names (JSON and YAML)", () => {
+  const json = redact('{"apiKey": "abcd1234efgh5678", "password": "hunter2hunter2"}');
+  assert.equal(json.count, 2);
+  assert.equal(json.text, '{"apiKey": "[REDACTED]", "password": "[REDACTED]"}');
+  const yaml = redact("'password': 'hunter2hunter2'\n\"secret_token\": s3cr3tvalue99");
+  assert.equal(yaml.count, 2);
+  assert.doesNotMatch(yaml.text, /hunter2|s3cr3tvalue/);
+  assert.match(yaml.text, /^'password': '\[REDACTED\]'/);
+});
