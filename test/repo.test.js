@@ -62,9 +62,9 @@ test("README documents every action.yml input (English and Finnish tables)", () 
   const y = read("action.yml");
   const inputs = y.slice(y.indexOf("inputs:"), y.indexOf("\nruns:")).match(/^ {2}([a-z-]+):/gm).map((l) => l.trim().slice(0, -1));
   assert.ok(inputs.includes("github-token"));
-  const readme = read("README.md");
-  const en = readme.slice(0, readme.indexOf("## Käyttö"));
-  const fi = readme.slice(readme.indexOf("## Asetukset"), readme.indexOf("## Turvamalli"));
+  const en = read("README.md");
+  const fiReadme = read("README.fi.md");
+  const fi = fiReadme.slice(fiReadme.indexOf("## Asetukset"), fiReadme.indexOf("## Turvamalli"));
   for (const name of inputs) {
     assert.ok(en.includes(`\`${name}\``), `${name} missing from English table`);
     assert.ok(fi.includes(`\`${name}\``), `${name} missing from Finnish table`);
