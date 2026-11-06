@@ -8,6 +8,7 @@ Korjattu (tietoturva):
 
 Muuta:
 
+- README: `base-url`-rajaus (`http` vain `localhost`/`127.0.0.1`), `dry-run` kutsuu mallia silti, epäonnistuneen mallikutsun jälkeen jäävä "Review in progress" -kommentti ja asetusvirheiden aina kaatava `fail-on-error`-huomio. Todennettu koodista ja testeistä; todentamaton mutaatiotestiluku poistettu.
 - Marketplace-valmius: `action.yml`:n nimi on "Budgeted AI PR Reviewer", kuvaus on alle 125 merkkiä, ja esimerkin versioviite (`examples/review.yml`) on `@v0.1.2`. Uudet testit tarkistavat nimen, kuvauksen pituuden, brändäyksen ja versioviitteet.
 
 ## 0.1.2 (2.11.2026)

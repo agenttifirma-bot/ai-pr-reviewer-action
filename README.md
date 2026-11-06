@@ -35,15 +35,17 @@ The Action does no `checkout`: it reads the changed files through the GitHub API
 | Input | Default | Meaning |
 | --- | --- | --- |
 | `api-key` | empty | Model key. Fork PRs get no secrets, so the Action then does nothing. |
-| `base-url` | required | OpenAI-compatible endpoint, `https` only. |
+| `base-url` | required | OpenAI-compatible endpoint, `https` only (plain `http` is accepted only for `localhost` and `127.0.0.1`). |
 | `model` | required | Model name. |
 | `github-token` | `${{ github.token }}` | Token for reading the PR files and writing one comment. The default is enough; override only if you need a different token. |
 | `max-input-tokens` | 20000 | Ceiling for the *estimated* input (max 100000; 3 characters per token, which holds for typical code and English but under-counts non-ASCII text such as CJK or emoji, where the real count can be higher). As many files as fit, smallest first; the rest are listed as "Not reviewed". |
 | `max-output-tokens` | 1500 | Hard ceiling for the reply (max 4000). |
 | `max-runs-per-pr` | 5 | Reviews per pull request across all pushes (max 20). |
 | `price-in`, `price-out` | 0 | USD per million tokens, only for the cost estimate in the comment. |
-| `dry-run` | `false` | `true` prints the comment to the log instead of posting it. |
-| `fail-on-error` | `false` | By default an error never blocks the PR. |
+| `dry-run` | `false` | `true` prints the comment to the log instead of posting it. The model is still called (and billed). |
+| `fail-on-error` | `false` | By default an error never blocks the PR. Configuration errors (wrong trigger, missing `base-url` or `model`) always fail the job. |
+
+A non-numeric or non-positive value in a numeric input falls back to its default; a value above the maximum is lowered to the maximum.
 
 Safety in short: it refuses `pull_request_target`, never runs or writes PR code, redacts secret-like strings and skips `.env`, key, lock and binary files before anything is sent, wraps the diff as data without tools, and only keeps findings that point at added lines the model was actually shown. The model may answer `unknown`, and the comment then says so. The token ceilings and run limits live in code, not in the prompt. Details (in Finnish) are in the sections below. The model can be wrong; the check verifies the location of a finding, not whether the claim is true.
 
@@ -79,7 +81,7 @@ Asennus vaihe vaiheelta:
 
 1. Kopioi `examples/review.yml` kohteeseen `.github/workflows/ai-review.yml`.
 2. Lisää repositorion salaisuus `LLM_API_KEY` (mallin avain). Vaihda tarvittaessa `base-url` ja `model`; `base-url` on oltava `https`-osoite.
-3. Halutessasi kokeile ensin lisäämällä `with`-lohkoon `dry-run: "true"`: kommentti tulostuu työn lokiin eikä julkaista PR:ään. Poista rivi, kun tulos näyttää hyvältä.
+3. Halutessasi kokeile ensin lisäämällä `with`-lohkoon `dry-run: "true"`: kommentti tulostuu työn lokiin eikä julkaista PR:ään. Mallia kutsutaan silti (kutsu maksaa), mutta ajokertaa ei varata. Poista rivi, kun tulos näyttää hyvältä.
 4. Avaa pull request. Action julkaisee yhden kommentin ja päivittää sitä paikallaan, kun PR:ään pushataan lisää (enintään `max-runs-per-pr` kertaa). Jos sama commit on jo tarkistettu, se ohitetaan.
 
 Esimerkkitiedosto estää myös päällekkäiset ajot (`concurrency`), jättää luonnos-PR:t väliin ja keskeyttää työn 5 minuutin kohdalla.
@@ -89,15 +91,17 @@ Esimerkkitiedosto estää myös päällekkäiset ajot (`concurrency`), jättää
 | Asetus | Oletus | Merkitys |
 | --- | --- | --- |
 | `api-key` | (tyhjä) | Mallin avain. Fork-PR:issä GitHub ei anna salaisuuksia, jolloin Action ei tee mitään. |
-| `base-url` | (pakollinen) | OpenAI-yhteensopiva osoite, vain `https`. |
+| `base-url` | (pakollinen) | OpenAI-yhteensopiva osoite, vain `https` (tavallinen `http` hyväksytään vain osoitteille `localhost` ja `127.0.0.1`). |
 | `model` | (pakollinen) | Mallin nimi. |
 | `github-token` | `${{ github.token }}` | Token PR:n tiedostojen lukemiseen ja yhden kommentin kirjoittamiseen. Oletus riittää; vaihda vain jos tarvitset toisen tokenin. |
 | `max-input-tokens` | 20 000 | Katto arvioidulle syötteelle (enintään 100 000). Arvio on 3 merkkiä/token, joka sopii koodille ja englannille mutta aliarvioi ei-ASCII-tekstin (esim. kiina, emoji), jolloin todellinen määrä voi ylittää arvion. Järjestelmäpromptin todellinen pituus lasketaan mukaan. Mahdollisimman monta tiedostoa pienimmästä alkaen; loput listataan kommentissa "Not reviewed". |
 | `max-output-tokens` | 1 500 | Kova katto vastaukselle (enintään 4 000). |
 | `max-runs-per-pr` | 5 | Montako kertaa yhtä PR:ää tarkistetaan kaikkien pushien yli (enintään 20). |
 | `price-in`, `price-out` | 0 | Hinta dollareina miljoonaa tokenia kohden. Vain kustannusarvioon kommentin alariville. |
-| `dry-run` | `false` | `true` tulostaa kommentin lokiin eikä julkaise sitä. |
-| `fail-on-error` | `false` | Oletuksena virhe ei koskaan estä PR:ää. |
+| `dry-run` | `false` | `true` tulostaa kommentin lokiin eikä julkaise sitä. Mallia kutsutaan silti (kutsu maksaa). |
+| `fail-on-error` | `false` | Oletuksena virhe ei estä PR:ää. Asetusvirheet (väärä tapahtuma, puuttuva `base-url` tai `model`) kaatavat työn aina. |
+
+Numeerinen asetus, jonka arvo ei ole positiivinen kokonaisluku, saa oletusarvon; enimmäisarvon ylittävä arvo lasketaan enimmäisarvoon.
 
 Ajoraja: kommentti varataan (merkitään ajokerta) ennen mallikutsua. Jos kirjoitus epäonnistuu (esim. `pull-requests: write` puuttuu), työ päättyy ennen mallikutsua eikä maksullista kutsua tehdä.
 
@@ -118,7 +122,7 @@ Katto on tokeneissa, ei dollareissa: tokenit tiedetään ennen kutsua, dollarihi
 - Malli voi olla väärässä ja jättää löytämättä asioita. Kommentti sanoo itse "can be wrong". Tarkistus lisäksi tarkastaa vain sijainnin, ei sitä onko väite totta.
 - Vain lisätyt rivit ja yksi mallikutsu. Ei repon muuta koodia kontekstina, ei rivikohtaisia kommentteja (yksi yhteenvetokommentti, päivitetään paikallaan), ei keskustelua eikä automaattisia korjauksia.
 - Suuri PR katkaistaan tokenkattoon: tiedostot, jotka eivät mahdu, näkyvät kommentin kohdassa "Not reviewed". Tiedostolistasta luetaan enintään 300 tiedostoa; loput merkitään tarkistamatta jääneiksi.
-- Kommentissa näytetään enintään 10 löydöstä, ja mallikutsun aikakatkaisu on 60 sekuntia. Jos kutsu epäonnistuu, kommenttia ei julkaista, eikä PR:ää estetä (paitsi jos `fail-on-error` on `true`).
+- Kommentissa näytetään enintään 10 löydöstä, ja mallikutsun aikakatkaisu on 60 sekuntia. Jos mallikutsu tai sen vastauksen tarkistus epäonnistuu, arviota ei julkaista: PR:ään jää kommentti "Review in progress" (tai edellinen arvio), ajokerta on jo kulunut, ja seuraava push yrittää uudelleen. PR:ää ei estetä (paitsi jos `fail-on-error` on `true`).
 - Ilman `api-key`:tä (fork-PR) ei lähetetä mitään mihinkään.
 - GitHubin ajurit eivät näe yksityisverkon (esim. Tailscale) osoitteita. Käytä julkista https-osoitetta.
 - Tekijän testit käyttävät väärennettyä GitHubia ja mallia sekä paikallista HTTP-palvelinta. Oikea mallikokeilu on tehty (katso CHANGELOG): pieni kehote vaikuttaa paljon, ja malli jättää silti osan virheistä löytämättä.
@@ -143,7 +147,7 @@ Vaatii Node.js 22 tai uudemman (`engines` kohdassa `package.json`); CI ajaa test
 npm test      # node --test "test/*.test.js"
 ```
 
-130 testiä ajetaan ilman verkkoa ja ilman avaimia. Lisäksi 47 tarkoituksella rikottua kohtaa lähdekoodissa (esim. rajan poisto, siivouksen ohitus, redirectin seuranta) kaatuu testeihin; ensimmäisellä kierroksella kuusi selvisi, ja ne paikattiin testeillä.
+130 testiä ajetaan ilman verkkoa ja ilman avaimia (ajettu, kaikki läpi).
 
 ## Lisenssi
 
