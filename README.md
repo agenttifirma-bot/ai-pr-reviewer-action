@@ -23,12 +23,14 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.2
+      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.1
         with:
           api-key: ${{ secrets.LLM_API_KEY }}
           base-url: https://openrouter.ai/api/v1
           model: deepseek/deepseek-chat
 ```
+
+`@v0.1.1` is the latest tag. It does not yet include what is on `master`: the run is reserved before the model call, the real system prompt length counts toward the input ceiling, quoted key names are redacted, more secret-type files are skipped, and look-alike characters are normalized before the delimiter check. All inputs in the table below work in `@v0.1.1`.
 
 The Action does no `checkout`: it reads the changed files through the GitHub API and posts **one** comment, updated in place.
 
@@ -66,12 +68,14 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.2
+      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.1
         with:
           api-key: ${{ secrets.LLM_API_KEY }}
           base-url: https://openrouter.ai/api/v1
           model: deepseek/deepseek-chat
 ```
+
+Uusin tagi on `@v0.1.1`. Se ei vielä sisällä kaikkea, mitä `master`-haarassa on: ajokerta varataan ennen mallikutsua, järjestelmäpromptin todellinen pituus lasketaan syöttökattoon, lainatut avainnimet siivotaan, useampia salaisuustiedostoja jätetään pois ja samannäköiset merkit normalisoidaan ennen erottimen tarkistusta. Kaikki alla olevan taulukon asetukset toimivat versiossa `@v0.1.1`.
 
 Action ei tee `checkout`-vaihetta eikä tarvitse sitä: se lukee muuttuneet tiedostot GitHubin rajapinnasta.
 
