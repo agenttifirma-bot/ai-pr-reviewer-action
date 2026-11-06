@@ -30,7 +30,7 @@ jobs:
           model: deepseek/deepseek-chat
 ```
 
-`@v0.1.1` is the latest tag. It does not yet include what is on `master`: the run is reserved before the model call, the real system prompt length counts toward the input ceiling, quoted key names are redacted, more secret-type files are skipped, and look-alike characters are normalized before the delimiter check. All inputs in the table below work in `@v0.1.1`.
+`@v0.1.1` is the latest tag. It does not yet include what is on `master`, and part of that is security-relevant. With `@v0.1.1`, a secret in a quoted key (for example `"api_key": "..."`) is not redacted and is sent to the model provider, and files such as `credentials.json`, `.npmrc` or `*.tfstate` are not skipped. Look-alike and invisible characters are not normalized before the delimiter check, so a crafted diff can more easily break out of the data block. Also, the run is reserved only after the model call and the real system prompt length does not count toward the input ceiling, so a failed comment write can still cost a paid call. Use `master` or wait for `@v0.1.2` if any of this matters to you. All inputs in the table below work in `@v0.1.1`.
 
 The Action does no `checkout`: it reads the changed files through the GitHub API and posts **one** comment, updated in place.
 
@@ -75,7 +75,7 @@ jobs:
           model: deepseek/deepseek-chat
 ```
 
-Uusin tagi on `@v0.1.1`. Se ei vielä sisällä kaikkea, mitä `master`-haarassa on: ajokerta varataan ennen mallikutsua, järjestelmäpromptin todellinen pituus lasketaan syöttökattoon, lainatut avainnimet siivotaan, useampia salaisuustiedostoja jätetään pois ja samannäköiset merkit normalisoidaan ennen erottimen tarkistusta. Kaikki alla olevan taulukon asetukset toimivat versiossa `@v0.1.1`.
+Uusin tagi on `@v0.1.1`. Se ei vielä sisällä kaikkea, mitä `master`-haarassa on, ja osa puuttuvista korjauksista koskee tietoturvaa. Versiossa `@v0.1.1` lainausmerkeissä oleva salaisuus (esimerkiksi `"api_key": "..."`) ei peity vaan menee mallin tarjoajalle, eikä esimerkiksi tiedostoja `credentials.json`, `.npmrc` ja `*.tfstate` jätetä pois. Samannäköisiä ja näkymättömiä merkkejä ei normalisoida ennen erottimen tarkistusta, joten muokattu diff voi helpommin rikkoa datalohkon. Lisäksi ajokerta varataan vasta mallikutsun jälkeen eikä järjestelmäpromptin todellista pituutta lasketa syöttökattoon, joten epäonnistunut kommentin kirjoitus voi silti aiheuttaa maksullisen kutsun. Käytä `master`-haaraa tai odota versiota `@v0.1.2`, jos nämä ovat sinulle tärkeitä. Kaikki alla olevan taulukon asetukset toimivat versiossa `@v0.1.1`.
 
 Action ei tee `checkout`-vaihetta eikä tarvitse sitä: se lukee muuttuneet tiedostot GitHubin rajapinnasta.
 
