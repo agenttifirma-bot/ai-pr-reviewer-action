@@ -93,7 +93,7 @@ test("action.yml: Marketplace requirements (name, short description, branding, q
 
 test("examples and README Action references use the package.json version", () => {
   const v = JSON.parse(read("package.json")).version;
-  for (const f of ["README.md", "examples/review.yml"]) {
+  for (const f of ["README.md", "README.fi.md", "examples/review.yml"]) {
     const refs = [...read(f).matchAll(/ai-pr-reviewer-action@(v[\d.]+)/g)].map((m) => m[1]);
     assert.ok(refs.length > 0, f);
     for (const r of refs) assert.equal(r, `v${v}`, f);
