@@ -12,7 +12,7 @@ A GitHub Action that posts one AI review comment per pull request with a hard to
 
 ## Quick start
 
-Add the workflow from [`examples/review.yml`](examples/review.yml) to `.github/workflows/` and store the model key as the secret `LLM_API_KEY`:
+Copy [`examples/review.yml`](examples/review.yml) into `.github/workflows/` in your repository and add the secret `LLM_API_KEY` (the model key):
 
 ```yaml
 on:
@@ -32,46 +32,20 @@ jobs:
           model: deepseek/deepseek-chat
 ```
 
-The Action does no `checkout`: it reads the changed files through the GitHub API and posts **one** comment, updated in place.
-
-Safety in short: it refuses `pull_request_target`, never runs or writes PR code, redacts secret-like strings and skips `.env`, key, lock and binary files before anything is sent, wraps the diff as data without tools, and only keeps findings that point at added lines the model was actually shown. The model may answer `unknown`, and the comment then says so. The token ceilings and run limits live in code, not in the prompt. The model can be wrong; the check verifies the location of a finding, not whether the claim is true.
-
-## Prompt injection test suite
-
-See [`injektio/README.md`](injektio/README.md) (written in Finnish): 19 cases (OWASP LLM01/LLM06), a canary metric, and a runner that records results in `kokeilut.jsonl` format.
-
-## Usage
-
-Copy [`examples/review.yml`](examples/review.yml) into `.github/workflows/` in your repository and add the secret `LLM_API_KEY`:
-
-```yaml
-on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-permissions:
-  contents: read
-  pull-requests: write
-jobs:
-  review:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.2
-        with:
-          api-key: ${{ secrets.LLM_API_KEY }}
-          base-url: https://openrouter.ai/api/v1
-          model: deepseek/deepseek-chat
-```
-
-The Action does not run a `checkout` step and does not need one: it reads the changed files through the GitHub API.
+The Action does not run a `checkout` step and does not need one: it reads the changed files through the GitHub API and posts **one** comment, updated in place.
 
 Setup step by step:
 
 1. Copy `examples/review.yml` to `.github/workflows/ai-review.yml`.
-2. Add the repository secret `LLM_API_KEY` (the model key). Change `base-url` and `model` if needed; `base-url` must be an `https` address.
+2. Add the repository secret `LLM_API_KEY`. Change `base-url` and `model` if needed; `base-url` must be an `https` address.
 3. If you like, try it first by adding `dry-run: "true"` to the `with` block: the comment is printed to the job log and not posted to the PR. Remove the line when the result looks good.
 4. Open a pull request. The Action posts one comment and updates it in place when more commits are pushed to the PR (at most `max-runs-per-pr` times). If the same commit has already been reviewed, it is skipped.
 
 The example file also prevents overlapping runs (`concurrency`), skips draft PRs, and times the job out after 5 minutes.
+
+## Prompt injection test suite
+
+See [`injektio/README.md`](injektio/README.md) (written in Finnish): 19 cases (OWASP LLM01/LLM06), a canary metric, and a runner that records results in `kokeilut.jsonl` format.
 
 ## Settings
 
@@ -132,7 +106,7 @@ Requires Node.js 22 or newer (`engines` in `package.json`); CI runs the tests on
 npm test      # node --test "test/*.test.js"
 ```
 
-130 tests run without a network and without keys. In addition, 47 deliberately broken spots in the source (e.g. removing a limit, bypassing redaction, following a redirect) fail the tests; on the first round six survived, and they were closed with tests.
+130 tests run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
 
 ## License
 

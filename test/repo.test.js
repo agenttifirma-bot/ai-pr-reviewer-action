@@ -62,9 +62,12 @@ test("README documents every action.yml input (English and Finnish tables)", () 
   const y = read("action.yml");
   const inputs = y.slice(y.indexOf("inputs:"), y.indexOf("\nruns:")).match(/^ {2}([a-z-]+):/gm).map((l) => l.trim().slice(0, -1));
   assert.ok(inputs.includes("github-token"));
-  const en = read("README.md");
+  const enReadme = read("README.md");
+  const en = enReadme.slice(enReadme.indexOf("## Settings"), enReadme.indexOf("## Security model"));
+  assert.ok(en.length > 0, "English Settings section not found");
   const fiReadme = read("README.fi.md");
   const fi = fiReadme.slice(fiReadme.indexOf("## Asetukset"), fiReadme.indexOf("## Turvamalli"));
+  assert.ok(fi.length > 0, "Finnish Asetukset section not found");
   for (const name of inputs) {
     assert.ok(en.includes(`\`${name}\``), `${name} missing from English table`);
     assert.ok(fi.includes(`\`${name}\``), `${name} missing from Finnish table`);
@@ -93,7 +96,7 @@ test("action.yml: Marketplace requirements (name, short description, branding, q
 
 test("examples and README Action references use the package.json version", () => {
   const v = JSON.parse(read("package.json")).version;
-  for (const f of ["README.md", "examples/review.yml"]) {
+  for (const f of ["README.md", "README.fi.md", "examples/review.yml"]) {
     const refs = [...read(f).matchAll(/ai-pr-reviewer-action@(v[\d.]+)/g)].map((m) => m[1]);
     assert.ok(refs.length > 0, f);
     for (const r of refs) assert.equal(r, `v${v}`, f);
