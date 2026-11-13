@@ -68,6 +68,8 @@ Katto on tokeneissa, ei dollareissa: tokenit tiedetään ennen kutsua, dollarihi
 
 ## Turvamalli
 
+Haavoittuvuuksien ilmoittaminen, täysi uhkamalli ja tunnetut rajoitukset (englanniksi): [SECURITY.md](SECURITY.md).
+
 - **Ei PR:n koodia.** Action ei tee checkoutia, ei aja mitään eikä kirjoita tiedostoja. Testi tarkistaa, ettei lähdekoodissa ole `child_process`-, `eval`- tai tiedostokirjoituskutsuja eikä kolmannen osapuolen riippuvuuksia.
 - **`pull_request`, ei `pull_request_target`.** Jälkimmäisellä salaisuudet olisivat käytössä fork-PR:ille, joiden teksti on epäluotettavaa. Action kieltäytyy käynnistymästä `pull_request_target`-tapahtumalla.
 - **Salaisuuksien siivous ennen mallia.** Tunnetut avainmuodot ja `key/token/secret/password`-sijoitukset korvataan, ja `.env`-, avain-, lukko- ja binääritiedostoja ei lähetetä lainkaan. Siivous on regex-pohjainen paras yritys, ei takuu.

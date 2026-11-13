@@ -68,6 +68,8 @@ The ceiling is in tokens, not dollars: tokens are known before the call, dollar 
 
 ## Security model
 
+Reporting vulnerabilities, the full threat model and known limitations: [SECURITY.md](SECURITY.md).
+
 - **No PR code.** The Action does no checkout, runs nothing and writes no files. A test checks that the source contains no `child_process`, `eval` or file-writing calls and no third-party dependencies.
 - **`pull_request`, not `pull_request_target`.** With the latter, secrets would be available to fork PRs, whose text is untrusted. The Action refuses to start on the `pull_request_target` event.
 - **Secret redaction before the model.** Known key formats and `key/token/secret/password` assignments are replaced, and `.env`, key, lock and binary files are not sent at all. Redaction is a regex-based best effort, not a guarantee.
