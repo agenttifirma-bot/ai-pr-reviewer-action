@@ -1,0 +1,113 @@
+**Kieli:** suomi | [English](README.md)
+
+# ai-pr-reviewer-action
+
+[![CI](https://github.com/tonyweckstrom1987/ai-pr-reviewer-action/actions/workflows/ci.yml/badge.svg)](https://github.com/tonyweckstrom1987/ai-pr-reviewer-action/actions/workflows/ci.yml) ![Lisenssi: MIT](https://img.shields.io/badge/lisenssi-MIT-blue.svg)
+
+GitHub Action, joka kirjoittaa jokaisesta pull requestista yhden tekoälykommentin. Kommentilla on kova tokenkatto ja selvä "en tiedä" -vastaus, eikä Action pääse käsiksi PR:n koodiin eikä salaisuuksiin. Se toimii minkä tahansa OpenAI-yhteensopivan rajapinnan kanssa (OpenRouter, LiteLLM, OpenAI ym.).
+
+**Lyhyesti:** Action ei koskaan hae eikä aja PR:n koodia. Se lähettää rajapinnalle vain siivottua diff-tekstiä, kieltäytyy käynnistymästä `pull_request_target`-tapahtumalla eikä tee mitään forkista tulevalla PR:llä (avainta ei ole). Se hyväksyy vain löydökset, jotka osoittavat lisättyyn riviin, jonka malli todella näki. Ajonaikaisia riippuvuuksia ei ole, ja ajoympäristö on Node 24.
+
+**Teknologiat:** JavaScript (ESM), Node.js 22/24, `node:test`. Ei ajonaikaisia riippuvuuksia.
+
+## Pikaopas
+
+Kopioi [`examples/review.yml`](examples/review.yml) repositoriosi kansioon `.github/workflows/` ja lisää salaisuus `LLM_API_KEY` (mallin avain):
+
+```yaml
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: tonyweckstrom1987/ai-pr-reviewer-action@v0.1.2
+        with:
+          api-key: ${{ secrets.LLM_API_KEY }}
+          base-url: https://openrouter.ai/api/v1
+          model: deepseek/deepseek-chat
+```
+
+Action ei tee `checkout`-vaihetta eikä tarvitse sitä: se lukee muuttuneet tiedostot GitHubin rajapinnasta ja kirjoittaa **yhden** kommentin, jota päivitetään paikallaan.
+
+Asennus vaihe vaiheelta:
+
+1. Kopioi `examples/review.yml` kohteeseen `.github/workflows/ai-review.yml`.
+2. Lisää repositorion salaisuus `LLM_API_KEY`. Vaihda tarvittaessa `base-url` ja `model`; `base-url` on oltava `https`-osoite.
+3. Halutessasi kokeile ensin lisäämällä `with`-lohkoon `dry-run: "true"`: kommentti tulostuu työn lokiin eikä julkaista PR:ään. Poista rivi, kun tulos näyttää hyvältä.
+4. Avaa pull request. Action julkaisee yhden kommentin ja päivittää sitä paikallaan, kun PR:ään pushataan lisää (enintään `max-runs-per-pr` kertaa). Jos sama commit on jo tarkistettu, se ohitetaan.
+
+Esimerkkitiedosto estää myös päällekkäiset ajot (`concurrency`), jättää luonnos-PR:t väliin ja keskeyttää työn 5 minuutin kohdalla.
+
+## Prompt injection -testisarja
+
+Katso [`injektio/README.md`](injektio/README.md) (suomeksi): 19 tapausta (OWASP LLM01/LLM06), kanariamittari ja ajuri, joka kirjaa tulokset `kokeilut.jsonl`-muotoon.
+
+## Asetukset
+
+| Asetus | Oletus | Merkitys |
+| --- | --- | --- |
+| `api-key` | (tyhjä) | Mallin avain. Forkista tulevilla PR:illä GitHub ei anna salaisuuksia, jolloin Action ei tee mitään. |
+| `base-url` | (pakollinen) | OpenAI-yhteensopiva osoite, vain `https`. |
+| `model` | (pakollinen) | Mallin nimi. |
+| `github-token` | `${{ github.token }}` | Token PR:n tiedostojen lukemiseen ja yhden kommentin kirjoittamiseen. Oletus riittää; vaihda vain, jos tarvitset toisen tokenin. |
+| `max-input-tokens` | 20 000 | Katto arvioidulle syötteelle (enintään 100 000). Arvio on 3 merkkiä tokenia kohden. Se sopii koodille ja englannille mutta aliarvioi ei-ASCII-tekstin (esim. kiina, emoji), jolloin todellinen määrä voi olla suurempi. Järjestelmäkehotteen todellinen pituus lasketaan mukaan. Mukaan otetaan niin monta tiedostoa kuin mahtuu pienimmästä alkaen; loput listataan kommentissa kohdassa "Not reviewed". |
+| `max-output-tokens` | 1 500 | Kova katto vastaukselle (enintään 4 000). |
+| `max-runs-per-pr` | 5 | Montako kertaa yhtä PR:ää tarkistetaan kaikkien pushien yli (enintään 20). |
+| `price-in`, `price-out` | 0 | Hinta dollareina miljoonaa tokenia kohden. Käytetään vain kommentin alimman rivin kustannusarvioon. |
+| `dry-run` | `false` | `true` tulostaa kommentin lokiin eikä julkaise sitä. |
+| `fail-on-error` | `false` | Oletuksena virhe ei koskaan estä PR:ää. |
+
+Ajoraja: kommentti varataan (ajokerta merkitään) ennen mallikutsua. Jos kirjoitus epäonnistuu (esim. `pull-requests: write` puuttuu), työ päättyy ennen mallikutsua eikä maksullista kutsua tehdä.
+
+Katto on tokeneissa, ei dollareissa: tokenit tiedetään ennen kutsua, dollarihinnat eivät. Hinnat annetaan vain arviota varten.
+
+## Turvamalli
+
+- **Ei PR:n koodia.** Action ei tee checkoutia, ei aja mitään eikä kirjoita tiedostoja. Testi tarkistaa, ettei lähdekoodissa ole `child_process`-, `eval`- tai tiedostokirjoituskutsuja eikä kolmannen osapuolen riippuvuuksia.
+- **`pull_request`, ei `pull_request_target`.** Jälkimmäisellä salaisuudet olisivat käytössä fork-PR:ille, joiden teksti on epäluotettavaa. Action kieltäytyy käynnistymästä `pull_request_target`-tapahtumalla.
+- **Salaisuuksien siivous ennen mallia.** Tunnetut avainmuodot ja `key/token/secret/password`-sijoitukset korvataan, ja `.env`-, avain-, lukko- ja binääritiedostoja ei lähetetä lainkaan. Siivous on regex-pohjainen paras yritys, ei takuu.
+- **Epäluotettava teksti.** Diff menee mallille `<data>`-lohkossa, jota ei voi sulkea sisältäpäin, ilman työkaluja. Mallin teksti puhdistetaan: ei linkkejä, HTML:ää, kuvia eikä @-mainintoja.
+- **Mallin väitteet tarkistetaan koodilla.** Löydös hyväksytään vain, jos tiedosto oli mukana ja rivi on lisätty rivi, jonka malli näki. Muut pudotetaan ja kommentti kertoo montako.
+- **"En tiedä" on hyväksytty vastaus.** Malli saa vastata `unknown`, ja kommentti sanoo silloin suoraan, ettei se ole arvio PR:stä.
+- **Rajat ovat koodissa.** Tokenkatot, ajokerrat per PR, vastauksen koko ja aikakatkaisu eivät ole mallin tai PR:n sisällön muutettavissa. Uudelleenohjauksia ei seurata (avain ei kulje toiselle palvelimelle), ja kommentin merkin `runs`/`sha` hyväksytään vain bot-tilien kommenteista, joten ihminen ei voi sammuttaa tarkistusta kommentilla.
+
+## Rajoitukset
+
+- Malli voi olla väärässä ja jättää löytämättä asioita. Kommentti sanoo itse "can be wrong". Tarkistus lisäksi tarkastaa vain sijainnin, ei sitä onko väite totta.
+- Vain lisätyt rivit ja yksi mallikutsu. Ei repon muuta koodia kontekstina, ei rivikohtaisia kommentteja (yksi yhteenvetokommentti, päivitetään paikallaan), ei keskustelua eikä automaattisia korjauksia.
+- Suuri PR katkaistaan tokenkattoon: tiedostot, jotka eivät mahdu, näkyvät kommentin kohdassa "Not reviewed". Tiedostolistasta luetaan enintään 300 tiedostoa; loput merkitään tarkistamatta jääneiksi.
+- Kommentissa näytetään enintään 10 löydöstä, ja mallikutsun aikakatkaisu on 60 sekuntia. Jos kutsu epäonnistuu, kommenttia ei julkaista, eikä PR:ää estetä (paitsi jos `fail-on-error` on `true`).
+- Ilman `api-key`:tä (fork-PR) ei lähetetä mitään mihinkään.
+- GitHubin ajurit eivät näe yksityisverkon (esim. Tailscale) osoitteita. Käytä julkista https-osoitetta.
+- Tekijän testit käyttävät väärennettyä GitHubia ja mallia sekä paikallista HTTP-palvelinta. Oikea mallikokeilu on tehty (katso CHANGELOG): pieni kehote vaikuttaa paljon, ja malli jättää silti osan virheistä löytämättä.
+
+## Vaihtoehtoja ja miksi tämä
+
+Tilanne 17.10.2026. AI-katselmointiin on jo paljon valmiita työkaluja; luin viidestä niiden README:n ja dokumentaation:
+
+- [PR-Agent](https://github.com/qodo-ai/pr-agent) (MIT, yhteisön ylläpitämä, yli 13 000 tähteä): laaja työkalu (`/describe`, `/review`, `/improve`, `/ask`), tukee LiteLLM:ää ja omaa OpenAI-osoitetta. Jos haluat paljon ominaisuuksia, valitse tämä. Luetuilla sivuilla ei näkynyt kulukattoa eikä ohjeita epäluotettavan PR-tekstin varalle, ja `max_output_tokens` on oletuksena rajaton.
+- [anc95/ChatGPT-CodeReview](https://github.com/anc95/ChatGPT-CodeReview) (ISC, yli 4 000 tähteä): OpenAI-, Azure- ja GitHub Models -tuki sekä patch-koon rajat. README ei kerro epäluotettavan tekstin käsittelystä.
+- [presubmit/ai-reviewer](https://github.com/presubmit/ai-reviewer) (MIT): yhteenveto ja rivikommentit, mutta esimerkki käyttää `pull_request_target`-tapahtumaa ilman turvaperusteluja.
+- [Nikita-Filonov/ai-review](https://github.com/Nikita-Filonov/ai-review) (Apache-2.0): monta mallituottajaa ja rivikommentit; agenttitila ajaa komentoja repossa.
+- [freeCodeCampin opetusartikkeli](https://www.freecodecamp.org/news/how-to-build-a-secure-ai-pr-reviewer-with-claude-github-actions-and-javascript/) (huhtikuu 2026, ei ylläpidetty työkalu): ainoa, joka kertoo epäluotettavan diffin käsittelystä ja siivoaa salaisuuksia, mutta katkaisee diffin 4 000 merkkiin kertomatta siitä kommentissa.
+
+Tämä ei kilpaile ominaisuuksilla. Se on tarkoituksella pieni ja tekee kolme asiaa, joita luetuissa dokumenteissa ei näkynyt yhdessä: kova ennalta varattu tokenkatto (ja ajokerrat per PR), mallin sallittu "en tiedä" ja löydösten sijainnin tarkistus koodilla, sekä avoin lista siitä mitä ei tarkistettu. Dokumenttien perusteella tehty vertailu on lukemani varassa: jos jokin kohta on vanhentunut tai väärin, avaa issue.
+
+## Kehitys
+
+Vaatii Node.js 22 tai uudemman (`engines` kohdassa `package.json`); CI ajaa testit Node 22:lla ja 24:llä. Asennettavaa ei ole, koska riippuvuuksia ei ole.
+
+```bash
+npm test      # node --test "test/*.test.js"
+```
+
+130 testiä ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
+
+## Lisenssi
+
+MIT
