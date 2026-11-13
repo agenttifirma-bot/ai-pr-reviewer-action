@@ -1,6 +1,6 @@
 # Muutosloki
 
-## Julkaisematon
+## 0.1.2 (6.11.2026)
 
 Korjattu (tietoturva):
 
