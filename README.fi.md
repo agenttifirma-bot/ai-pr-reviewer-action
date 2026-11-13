@@ -58,6 +58,7 @@ Katso [`injektio/README.md`](injektio/README.md) (suomeksi): 19 tapausta (OWASP 
 | `max-input-tokens` | 20 000 | Katto arvioidulle syötteelle (enintään 100 000). Arvio on 3 merkkiä tokenia kohden. Se sopii koodille ja englannille mutta aliarvioi ei-ASCII-tekstin (esim. kiina, emoji), jolloin todellinen määrä voi olla suurempi. Järjestelmäkehotteen todellinen pituus lasketaan mukaan. Mukaan otetaan niin monta tiedostoa kuin mahtuu pienimmästä alkaen; loput listataan kommentissa kohdassa "Not reviewed". |
 | `max-output-tokens` | 1 500 | Kova katto vastaukselle (enintään 4 000). |
 | `max-runs-per-pr` | 5 | Montako kertaa yhtä PR:ää tarkistetaan kaikkien pushien yli (enintään 20). |
+| `context-lines` | 0 | Muuttumattomia rivejä jokaisen muutoslohkon (hunkin) molemmin puolin (enintään 20). 0 = pois: kehote on täsmälleen entisellään. Rivit luetaan head-commitista contents-rajapinnalla (vain GET, tarvitsee `contents: read` -oikeuden, enintään 20 tiedostoa ajoa kohden), ja ne lasketaan `max-input-tokens`-katon sisään. Jos rivit eivät mahdu, luku epäonnistuu tai tiedosto ei vastaa patchia, kyseinen tiedosto tarkistetaan pelkällä patchilla. Kontekstirivit siivotaan kuten diff ja lähetetään `<data>`-lohkossa kontekstiksi merkittyinä. Löydökset hyväksytään edelleen vain lisätyillä riveillä. Huomaa: tämä lähettää mallin tarjoajalle tiedoston sisältöä, joka ei kuulu diffiin. |
 | `price-in`, `price-out` | 0 | Hinta dollareina miljoonaa tokenia kohden. Käytetään vain kommentin alimman rivin kustannusarvioon. |
 | `dry-run` | `false` | `true` tulostaa kommentin lokiin eikä julkaise sitä. |
 | `fail-on-error` | `false` | Oletuksena virhe ei koskaan estä PR:ää. |
@@ -79,7 +80,7 @@ Katto on tokeneissa, ei dollareissa: tokenit tiedetään ennen kutsua, dollarihi
 ## Rajoitukset
 
 - Malli voi olla väärässä ja jättää löytämättä asioita. Kommentti sanoo itse "can be wrong". Tarkistus lisäksi tarkastaa vain sijainnin, ei sitä onko väite totta.
-- Vain lisätyt rivit ja yksi mallikutsu. Ei repon muuta koodia kontekstina, ei rivikohtaisia kommentteja (yksi yhteenvetokommentti, päivitetään paikallaan), ei keskustelua eikä automaattisia korjauksia.
+- Vain lisätyt rivit ja yksi mallikutsu. Repon muuta koodia ei lueta, paitsi valinnainen `context-lines` (muutama muuttumaton rivi jokaisen muutoslohkon ympäriltä samasta tiedostosta), ei rivikohtaisia kommentteja (yksi yhteenvetokommentti, päivitetään paikallaan), ei keskustelua eikä automaattisia korjauksia.
 - Suuri PR katkaistaan tokenkattoon: tiedostot, jotka eivät mahdu, näkyvät kommentin kohdassa "Not reviewed". Tiedostolistasta luetaan enintään 300 tiedostoa; loput merkitään tarkistamatta jääneiksi.
 - Kommentissa näytetään enintään 10 löydöstä, ja mallikutsun aikakatkaisu on 60 sekuntia. Jos kutsu epäonnistuu, kommenttia ei julkaista, eikä PR:ää estetä (paitsi jos `fail-on-error` on `true`).
 - Ilman `api-key`:tä (fork-PR) ei lähetetä mitään mihinkään.
@@ -106,7 +107,7 @@ Vaatii Node.js 22 tai uudemman (`engines` kohdassa `package.json`); CI ajaa test
 npm test      # node --test "test/*.test.js"
 ```
 
-130 testiä ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
+173 testiä ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
 
 ## Lisenssi
 

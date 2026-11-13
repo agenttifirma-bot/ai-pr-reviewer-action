@@ -1,5 +1,14 @@
 # Muutosloki
 
+## Julkaisematon
+
+Lisätty:
+
+- Uusi valinnainen syöte `context-lines` (oletus 0 = pois, enintään 20). Kun arvo on suurempi kuin 0, jokaisen muutoslohkon ympärille liitetään enintään näin monta muuttumatonta riviä molemmin puolin. Rivit luetaan head-commitista contents-rajapinnalla (vain GET, enintään 20 tiedostoa ajoa kohden) ja merkitään kehotteessa kontekstiksi. Tausta: tarkastaja näki pelkän patchin ja saattoi hylätä koodin sillä perusteella, että funktio näytti katkeavan.
+- Kontekstirivit lasketaan `max-input-tokens`-katon sisään ja siivotaan (`redact`) kuten diff. Jos ne eivät mahdu, luku epäonnistuu tai tiedoston sisältö ei vastaa patchia, tiedosto tarkistetaan pelkällä patchilla. Lokiin kirjataan vain virheen tyyppi ja HTTP-tila.
+- Oletus 0 ei muuta kehotetta eikä pyyntöjä lainkaan. Järjestelmäkehotteeseen lisätään kontekstia koskeva huomautus vain, jos jokin tiedosto sai kontekstia.
+- Rajat: `limits.js`:n olemassa olevia arvoja ei muutettu. Uudet vakiot: `MAX_CONTEXT_LINES` (20), `MAX_CONTEXT_FILES` (20), `MAX_CONTEXT_LINE_CHARS` (400).
+
 ## 0.1.2 (6.11.2026)
 
 Korjattu (tietoturva):

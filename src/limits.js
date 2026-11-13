@@ -15,5 +15,9 @@ export const DEFAULTS = {
   maxRunsPerPr: 5,
 };
 export const HARD_CAPS = { maxInputTokens: 100_000, maxOutputTokens: 4_000, maxRunsPerPr: 20 };
+// Optional surrounding context (input context-lines). New limits; none of the values above changed.
+export const MAX_CONTEXT_LINES = 20;        // per side of a hunk
+export const MAX_CONTEXT_FILES = 20;        // at most this many contents API reads per run
+export const MAX_CONTEXT_LINE_CHARS = 400;  // longer context lines are cut
 export const SEVERITIES = ["high", "medium", "low"];
 export const CONFIDENCES = ["high", "medium"];

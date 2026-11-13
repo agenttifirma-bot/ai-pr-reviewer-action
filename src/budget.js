@@ -34,6 +34,12 @@ export function select(files, maxInputTokens, overhead = overheadTokens()) {
   return { kept, skipped, inputTokens: used };
 }
 
+/** Extra input tokens when a file's plain text (plainLen chars) is replaced by a version with context (withLen chars); noteLen is added once, for the first file. */
+export function contextExtraTokens(filename, plainLen, withLen, noteLen = 0) {
+  const per = (len) => estimateTokens(len + filename.length + 40);
+  return per(withLen) - per(plainLen) + (noteLen > 0 ? estimateTokens(noteLen) : 0);
+}
+
 /** Estimated cost in USD from per-million-token prices; null when prices are not configured. */
 export function cost(inputTokens, outputTokens, priceIn, priceOut) {
   if (!(priceIn > 0) && !(priceOut > 0)) return null;

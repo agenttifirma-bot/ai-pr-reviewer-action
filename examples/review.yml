@@ -26,5 +26,6 @@ jobs:
           max-input-tokens: "20000"
           max-output-tokens: "1500"
           max-runs-per-pr: "5"
+          # context-lines: "5"                     # optional: show up to 5 unchanged lines around each change (needs contents: read, above)
           price-in: "0.30"                        # optional: USD per million tokens, for the cost estimate
           price-out: "1.20"

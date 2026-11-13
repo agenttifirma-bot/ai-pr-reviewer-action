@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
-import { cost, select } from "./budget.js";
-import { addedLines, numberedPatch, skipReason } from "./diff.js";
+import { contextExtraTokens, cost, select } from "./budget.js";
+import { addedLines, numberedPatch, numberedPatchWithContext, skipReason } from "./diff.js";
 import { client, GitHubError } from "./github.js";
-import { DEFAULTS, HARD_CAPS } from "./limits.js";
+import { DEFAULTS, HARD_CAPS, MAX_CONTEXT_FILES, MAX_CONTEXT_LINE_CHARS, MAX_CONTEXT_LINES } from "./limits.js";
 import { chat, LLMError } from "./llm.js";
-import { buildUserMessage, SYSTEM_PROMPT } from "./prompt.js";
+import { buildUserMessage, CONTEXT_NOTE, SYSTEM_PROMPT } from "./prompt.js";
 import { redact } from "./redact.js";
 import { marker, parseMarker, render } from "./render.js";
 import { extractJson, validate, ValidationError } from "./validate.js";
@@ -60,6 +60,7 @@ export async function run({ env = process.env, fetchImpl = fetch, log = console 
   const maxInputTokens = intInput(env, "max-input-tokens", DEFAULTS.maxInputTokens, HARD_CAPS.maxInputTokens);
   const maxOutputTokens = intInput(env, "max-output-tokens", DEFAULTS.maxOutputTokens, HARD_CAPS.maxOutputTokens);
   const maxRuns = intInput(env, "max-runs-per-pr", DEFAULTS.maxRunsPerPr, HARD_CAPS.maxRunsPerPr);
+  const contextLines = intInput(env, "context-lines", 0, MAX_CONTEXT_LINES);
   const dryRun = input(env, "dry-run") === "true";
 
   const gh = client({ token: input(env, "github-token") || env.GITHUB_TOKEN, apiUrl: env.GITHUB_API_URL || "https://api.github.com", fetchImpl });
@@ -96,6 +97,35 @@ export async function run({ env = process.env, fetchImpl = fetch, log = console 
     notice("Nothing reviewable in this pull request: no model call was made.");
     return { outcome: "skipped_nothing_to_review" };
   }
+  // Optional context (context-lines > 0): read the file at the head commit and show lines around each hunk.
+  // Everything is best effort inside the existing input ceiling: on any problem the file keeps its plain patch.
+  let usedTokens = picked.inputTokens;
+  let withContext = 0;
+  if (contextLines > 0) {
+    const failures = {};
+    const fail = (code) => { failures[code] = (failures[code] ?? 0) + 1; };
+    let fetches = 0;
+    for (const k of [...picked.kept].sort((a, b) => a.text.length - b.text.length || a.filename.localeCompare(b.filename))) {
+      if (fetches >= MAX_CONTEXT_FILES) { fail("context_file_limit"); continue; }
+      const p = prepared.find((x) => x.filename === k.filename);
+      fetches += 1;
+      let text;
+      try {
+        text = await gh.fileText(owner, repo, p.filename, sha);
+      } catch (e) {
+        fail(e instanceof GitHubError ? e.code : "unexpected_error");
+        continue;
+      }
+      const numbered = numberedPatchWithContext(candidates.find((c) => c.filename === p.filename).patch, text, contextLines, MAX_CONTEXT_LINE_CHARS);
+      if (numbered === null) { fail("context_mismatch"); continue; }
+      const extra = contextExtraTokens(p.filename, p.numbered.length, numbered.length, withContext === 0 ? CONTEXT_NOTE.length + 1 : 0);
+      if (usedTokens + extra > maxInputTokens) { fail("context_over_budget"); continue; }
+      usedTokens += extra;
+      withContext += 1;
+      p.numbered = numbered;
+    }
+    for (const [code, n] of Object.entries(failures)) notice(`Context skipped for ${n} file(s): ${code}. The plain patch was reviewed instead.`);
+  }
   let redacted = 0;
   const allowed = new Map();
   const toSend = picked.kept.map((k) => {
@@ -121,13 +151,13 @@ export async function run({ env = process.env, fetchImpl = fetch, log = console 
 
   const reply = await chat({
     baseUrl, apiKey, model, fetchImpl,
-    system: SYSTEM_PROMPT,
+    system: withContext > 0 ? `${SYSTEM_PROMPT}\n${CONTEXT_NOTE}` : SYSTEM_PROMPT,
     user: buildUserMessage(String(event.pull_request.title ?? ""), toSend),
     maxOutputTokens,
   });
   const review = validate(extractJson(reply.content), allowed);
   const usage = reply.usage;
-  const costUsd = cost(usage?.input ?? picked.inputTokens, usage?.output ?? maxOutputTokens, priceInput(env, "price-in"), priceInput(env, "price-out"));
+  const costUsd = cost(usage?.input ?? usedTokens, usage?.output ?? maxOutputTokens, priceInput(env, "price-in"), priceInput(env, "price-out"));
   const body = render({ review, sha, runs, skipped, redacted, usage, costUsd, model, reviewedFiles: toSend.length });
   if (dryRun) {
     log.log(body);

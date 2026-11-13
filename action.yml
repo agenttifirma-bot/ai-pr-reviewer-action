@@ -30,6 +30,10 @@ inputs:
     description: "Maximum reviews per pull request across all pushes (default 5, max 20)."
     required: false
     default: "5"
+  context-lines:
+    description: "Unchanged lines to show around each changed hunk, read from the head commit (default 0 = off, max 20). Needs contents: read. Counted inside max-input-tokens; if it does not fit or the read fails, the plain patch is used."
+    required: false
+    default: "0"
   price-in:
     description: "USD per million input tokens, for the cost estimate shown in the comment (optional)."
     required: false

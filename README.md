@@ -58,6 +58,7 @@ See [`injektio/README.md`](injektio/README.md) (written in Finnish): 19 cases (O
 | `max-input-tokens` | 20 000 | Ceiling for the estimated input (max 100 000). The estimate is 3 characters per token, which holds for code and English but under-counts non-ASCII text (e.g. CJK, emoji), where the real count can be higher. The real length of the system prompt is included. As many files as fit, smallest first; the rest are listed in the comment as "Not reviewed". |
 | `max-output-tokens` | 1 500 | Hard ceiling for the reply (max 4 000). |
 | `max-runs-per-pr` | 5 | How many times one PR is reviewed across all pushes (max 20). |
+| `context-lines` | 0 | Unchanged lines to show on each side of every changed hunk (max 20). 0 = off: the prompt is exactly as before. The lines are read from the head commit with the contents API (GET only, needs `contents: read`; at most 20 files per run) and counted inside `max-input-tokens`. If they do not fit, a read fails or the file does not match the patch, that file is reviewed with the plain patch. Context lines are redacted like the diff and sent inside the `<data>` block, marked as context. Findings are still accepted only on added lines. Note: this sends file content that is not part of the diff to the model provider. |
 | `price-in`, `price-out` | 0 | USD per million tokens. Used only for the cost estimate on the last line of the comment. |
 | `dry-run` | `false` | `true` prints the comment to the log instead of posting it. |
 | `fail-on-error` | `false` | By default an error never blocks the PR. |
@@ -79,7 +80,7 @@ The ceiling is in tokens, not dollars: tokens are known before the call, dollar 
 ## Limitations
 
 - The model can be wrong and can miss things. The comment itself says "can be wrong". The check also verifies only the location, not whether the claim is true.
-- Added lines only, and one model call. No other repository code as context, no line-by-line comments (one summary comment, updated in place), no conversation and no automatic fixes.
+- Added lines only, and one model call. Other repository code is not read, except the optional `context-lines` (a few unchanged lines around each hunk, from the same file), no line-by-line comments (one summary comment, updated in place), no conversation and no automatic fixes.
 - A large PR is cut at the token ceiling: files that do not fit appear in the "Not reviewed" section of the comment. At most 300 files are read from the file list; the rest are marked as not reviewed.
 - The comment shows at most 10 findings, and the model call times out after 60 seconds. If the call fails, no comment is posted and the PR is not blocked (unless `fail-on-error` is `true`).
 - Without `api-key` (fork PR), nothing is sent anywhere.
@@ -106,7 +107,7 @@ Requires Node.js 22 or newer (`engines` in `package.json`); CI runs the tests on
 npm test      # node --test "test/*.test.js"
 ```
 
-130 tests run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
+173 tests run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
 
 ## License
 

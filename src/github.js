@@ -46,6 +46,15 @@ export function client({ token, apiUrl = "https://api.github.com", fetchImpl = f
       }
       return { files, truncated: true };
     },
+    /** Text of one file at a commit (contents API, GET only). Throws GitHubError; never returns a partial or non-text reply. */
+    async fileText(owner, repo, path, ref) {
+      const enc = String(path).split("/").map(encodeURIComponent).join("/");
+      const r = await call(`/repos/${owner}/${repo}/contents/${enc}?ref=${encodeURIComponent(ref)}`);
+      if (!r || Array.isArray(r) || r.type !== "file" || r.encoding !== "base64" || typeof r.content !== "string") throw new GitHubError("github_bad_reply");
+      const text = Buffer.from(r.content, "base64").toString("utf8");
+      if (text.includes("\u0000")) throw new GitHubError("github_bad_reply");
+      return text;
+    },
     /** Comments written by bot accounts only: a human cannot plant the marker to switch reviews off. */
     async listBotComments(owner, repo, number) {
       const all = [];

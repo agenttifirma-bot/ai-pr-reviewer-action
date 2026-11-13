@@ -30,7 +30,7 @@ export function baseEnv(over = {}) {
 }
 
 /** Fake network: GitHub REST + one LLM endpoint. Records every call. */
-export function fakeNet({ files = [{ filename: "src/app.js", status: "modified", patch: PATCH }], comments = [], reply, llmStatus = 200, llmThrow = false } = {}) {
+export function fakeNet({ files = [{ filename: "src/app.js", status: "modified", patch: PATCH }], comments = [], reply, llmStatus = 200, llmThrow = false, contents = {}, contentsThrow = false } = {}) {
   const calls = [];
   const state = { comments: [...comments], nextId: 1000 };
   const fetchImpl = async (url, init = {}) => {
@@ -41,6 +41,14 @@ export function fakeNet({ files = [{ filename: "src/app.js", status: "modified",
       if (llmThrow) throw new Error("boom");
       const content = typeof reply === "function" ? reply(body) : reply;
       return json({ choices: [{ message: { content } }], usage: { prompt_tokens: 1200, completion_tokens: 80 } }, llmStatus);
+    }
+    const cm = /\/contents\/([^?]+)\?ref=/.exec(u);
+    if (cm) {
+      if (contentsThrow) throw new Error("SECRET-network-detail");
+      const v = contents[decodeURIComponent(cm[1])];
+      if (typeof v === "number") return json({ message: "SECRET-api-message" }, v);
+      if (v === undefined) return json({ message: "not found" }, 404);
+      return json({ type: "file", encoding: "base64", content: Buffer.from(v).toString("base64") });
     }
     if (/\/pulls\/\d+\/files/.test(u)) return json(files);
     if (/\/issues\/\d+\/comments/.test(u) && (init.method ?? "GET") === "GET") return json(state.comments);
