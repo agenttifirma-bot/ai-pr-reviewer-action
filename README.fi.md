@@ -90,7 +90,7 @@ Katto on tokeneissa, ei dollareissa: tokenit tiedetään ennen kutsua, dollarihi
 
 Tilanne 17.10.2026. AI-katselmointiin on jo paljon valmiita työkaluja; luin viidestä niiden README:n ja dokumentaation:
 
-- [PR-Agent](https://github.com/qodo-ai/pr-agent) (MIT, yhteisön ylläpitämä, yli 13 000 tähteä): laaja työkalu (`/describe`, `/review`, `/improve`, `/ask`), tukee LiteLLM:ää ja omaa OpenAI-osoitetta. Jos haluat paljon ominaisuuksia, valitse tämä. Luetuilla sivuilla ei näkynyt kulukattoa eikä ohjeita epäluotettavan PR-tekstin varalle, ja `max_output_tokens` on oletuksena rajaton.
+- [PR-Agent](https://github.com/The-PR-Agent/pr-agent) (MIT, yhteisön ylläpitämä, yli 13 000 tähteä): laaja työkalu (`/describe`, `/review`, `/improve`, `/ask`), tukee LiteLLM:ää ja omaa OpenAI-osoitetta. Jos haluat paljon ominaisuuksia, valitse tämä. Luetuilla sivuilla ei näkynyt kulukattoa eikä ohjeita epäluotettavan PR-tekstin varalle, ja `max_output_tokens` on oletuksena rajaton.
 - [anc95/ChatGPT-CodeReview](https://github.com/anc95/ChatGPT-CodeReview) (ISC, yli 4 000 tähteä): OpenAI-, Azure- ja GitHub Models -tuki sekä patch-koon rajat. README ei kerro epäluotettavan tekstin käsittelystä.
 - [presubmit/ai-reviewer](https://github.com/presubmit/ai-reviewer) (MIT): yhteenveto ja rivikommentit, mutta esimerkki käyttää `pull_request_target`-tapahtumaa ilman turvaperusteluja.
 - [Nikita-Filonov/ai-review](https://github.com/Nikita-Filonov/ai-review) (Apache-2.0): monta mallituottajaa ja rivikommentit; agenttitila ajaa komentoja repossa.
