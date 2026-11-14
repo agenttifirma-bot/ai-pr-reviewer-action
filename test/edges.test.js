@@ -74,9 +74,9 @@ test("redact: all allowed Bearer characters (. _ ~ + / - =) are covered, and a t
   assert.equal(redact(`Bearer\t${pad(20)}`).text, "Bearer [REDACTED]");
 });
 
-test("redact: the Bearer rule is case sensitive (lowercase 'bearer' is not matched)", () => {
-  const r = redact(`bearer ${pad(20)}`);
-  assert.equal(r.count, 0);
+test("redact: a capitalised 'Bearer <token>' is always redacted", () => {
+  const r = redact(`Bearer ${pad(20)}`);
+  assert.equal(r.count, 1);
 });
 
 // --- redact: input types ---
