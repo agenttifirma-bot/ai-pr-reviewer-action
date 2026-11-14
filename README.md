@@ -43,6 +43,8 @@ Setup step by step:
 
 The example file also prevents overlapping runs (`concurrency`), skips draft PRs, and times the job out after 5 minutes.
 
+Security policy and threat model: see [`SECURITY.md`](SECURITY.md).
+
 ## Prompt injection test suite
 
 See [`injektio/README.md`](injektio/README.md) (written in Finnish): 19 cases (OWASP LLM01/LLM06), a canary metric, and a runner that records results in `kokeilut.jsonl` format.

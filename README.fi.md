@@ -43,6 +43,8 @@ Asennus vaihe vaiheelta:
 
 Esimerkkitiedosto estää myös päällekkäiset ajot (`concurrency`), jättää luonnos-PR:t väliin ja keskeyttää työn 5 minuutin kohdalla.
 
+Tietoturvakäytäntö ja uhkamalli: katso [`SECURITY.md`](SECURITY.md) (englanniksi).
+
 ## Prompt injection -testisarja
 
 Katso [`injektio/README.md`](injektio/README.md) (suomeksi): 19 tapausta (OWASP LLM01/LLM06), kanariamittari ja ajuri, joka kirjaa tulokset `kokeilut.jsonl`-muotoon.
