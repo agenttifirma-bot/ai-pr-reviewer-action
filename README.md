@@ -106,7 +106,7 @@ Requires Node.js 22 or newer (`engines` in `package.json`); CI runs the tests on
 npm test      # node --test "test/*.test.js"
 ```
 
-130 tests run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
+179 tests run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
 
 ## License
 
