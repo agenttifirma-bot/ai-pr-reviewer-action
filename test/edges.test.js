@@ -32,10 +32,11 @@ test("redact: a value ending in ; or , keeps the terminator outside the redactio
   assert.equal(redact("password=abcdef;").count, 1);
 });
 
-test("redact: a value is only read up to the first ; so a short first part is not matched", () => {
+// Known gap (not locked as expected behaviour): the value stops at the first ';',
+// so the part after it is left visible. Marked todo until the redact rule is fixed.
+test("redact: the part of a value after ';' should also be hidden", { todo: "known redact gap" }, () => {
   const r = redact("password=abc;def123");
-  assert.equal(r.count, 0);
-  assert.equal(r.text, "password=abc;def123");
+  assert.doesNotMatch(r.text, /def123/);
 });
 
 test("redact: a value stops at the line end and the next line is untouched", () => {
@@ -74,8 +75,10 @@ test("redact: all allowed Bearer characters (. _ ~ + / - =) are covered, and a t
   assert.equal(redact(`Bearer\t${pad(20)}`).text, "Bearer [REDACTED]");
 });
 
-test("redact: a capitalised 'Bearer <token>' is always redacted", () => {
-  const r = redact(`Bearer ${pad(20)}`);
+// Known gap: the Authorization scheme is case-insensitive (RFC 9110), but the rule only
+// matches 'Bearer'. Marked todo so the gap is documented without being locked in.
+test("redact: a lowercase 'bearer <token>' should also be redacted", { todo: "known redact gap" }, () => {
+  const r = redact(`bearer ${pad(20)}`);
   assert.equal(r.count, 1);
 });
 
