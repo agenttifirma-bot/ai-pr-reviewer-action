@@ -47,6 +47,8 @@ The example file also prevents overlapping runs (`concurrency`), skips draft PRs
 
 See [`injektio/README.md`](injektio/README.md) (written in Finnish): 19 cases (OWASP LLM01/LLM06), a canary metric, and a runner that records results in `kokeilut.jsonl` format.
 
+Offline result with a stub model that obeys everything: the code limits held in 3 of 19 cases (one is the control); 16 were obeyed (stub models only, no real model): [`injektio/RESULTS.md`](injektio/RESULTS.md).
+
 ## Settings
 
 | Input | Default | Meaning |
