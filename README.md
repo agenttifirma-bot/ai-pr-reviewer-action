@@ -47,6 +47,8 @@ The example file also prevents overlapping runs (`concurrency`), skips draft PRs
 
 See [`injektio/README.md`](injektio/README.md) (written in Finnish): 19 cases (OWASP LLM01/LLM06), a canary metric, and a runner that records results in `kokeilut.jsonl` format.
 
+Offline result with a stub model that obeys everything: the code limits held in 3 of 19 cases (one is the control); 16 were obeyed (stub models only, no real model): [`injektio/RESULTS.md`](injektio/RESULTS.md).
+
 ## Settings
 
 | Input | Default | Meaning |
@@ -90,7 +92,7 @@ The ceiling is in tokens, not dollars: tokens are known before the call, dollar 
 
 Situation on 17 October 2026. Many ready-made AI review tools already exist; I read the README and documentation of five of them:
 
-- [PR-Agent](https://github.com/qodo-ai/pr-agent) (MIT, community-maintained, over 13,000 stars): a broad tool (`/describe`, `/review`, `/improve`, `/ask`) that supports LiteLLM and your own OpenAI address. If you want many features, choose this. The pages I read showed no cost ceiling and no guidance for untrusted PR text, and `max_output_tokens` is unlimited by default.
+- [PR-Agent](https://github.com/The-PR-Agent/pr-agent) (MIT, community-maintained, over 13,000 stars): a broad tool (`/describe`, `/review`, `/improve`, `/ask`) that supports LiteLLM and your own OpenAI address. If you want many features, choose this. The pages I read showed no cost ceiling and no guidance for untrusted PR text, and `max_output_tokens` is unlimited by default.
 - [anc95/ChatGPT-CodeReview](https://github.com/anc95/ChatGPT-CodeReview) (ISC, over 4,000 stars): OpenAI, Azure and GitHub Models support and patch size limits. The README does not say how untrusted text is handled.
 - [presubmit/ai-reviewer](https://github.com/presubmit/ai-reviewer) (MIT): summary and line comments, but the example uses the `pull_request_target` event without any security reasoning.
 - [Nikita-Filonov/ai-review](https://github.com/Nikita-Filonov/ai-review) (Apache-2.0): many model providers and line comments; the agent mode runs commands in the repository.
@@ -106,7 +108,7 @@ Requires Node.js 22 or newer (`engines` in `package.json`); CI runs the tests on
 npm test      # node --test "test/*.test.js"
 ```
 
-170 tests run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
+190 tests run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
 
 ## License
 
