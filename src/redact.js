@@ -11,10 +11,36 @@ const RULES = [
   [/\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g, "[REDACTED jwt]"],
   [/\bBearer\s+[A-Za-z0-9._~+/-]{20,}=*/g, "Bearer [REDACTED]"],
 ];
-// The name is matched as one plain word and checked against SECRET_WORD in the callback. Putting the keyword
-// inside the regex between two [A-Za-z0-9_]* runs backtracks quadratically on long key-like words.
-const ASSIGNMENT = /\b([A-Za-z0-9_]+)(["']?)(\s*[:=]\s*)(["']?)([^\s"',;]{6,})\4/g;
+// Assignments are found in two linear steps. PREFIX matches only `name<quote?><sep><quote?>` and the callback
+// checks the name against SECRET_WORD. Only for secret names is the value read (VALUE, sticky), so a non-secret
+// name never swallows a later secret assignment (`user=bob&token=abcdef123`). Putting the keyword inside one
+// regex between two [A-Za-z0-9_]* runs backtracks quadratically on long key-like words.
+const PREFIX = /\b([A-Za-z0-9_]+)(["']?)(\s*[:=]\s*)(["']?)/g;
+const VALUE = /[^\s"',;]{6,}/y;
 const SECRET_WORD = /key|token|secret|password|passwd|pwd/i;
+
+function redactAssignments(input, onHit) {
+  let out = "";
+  let last = 0;
+  PREFIX.lastIndex = 0;
+  let m;
+  while ((m = PREFIX.exec(input)) !== null) {
+    const [prefix, name, nameQ, sep, q] = m;
+    const valueStart = m.index + prefix.length;
+    if (!SECRET_WORD.test(name)) continue; // resume right after the prefix, so the value is scanned again
+    VALUE.lastIndex = valueStart;
+    const v = VALUE.exec(input);
+    if (!v) continue;
+    const end = valueStart + v[0].length;
+    if (q && input[end] !== q) continue;
+    if (v[0].startsWith("[REDACTED")) continue;
+    onHit();
+    out += input.slice(last, m.index) + `${name}${nameQ}${sep}${q}[REDACTED]${q}`;
+    last = end + q.length;
+    PREFIX.lastIndex = last;
+  }
+  return out + input.slice(last);
+}
 
 /** @returns {{text: string, count: number}} */
 export function redact(text) {
@@ -26,11 +52,8 @@ export function redact(text) {
       return label;
     });
   }
-  out = out.replace(ASSIGNMENT, (m, name, nameQ, sep, q, value) => {
-    if (!SECRET_WORD.test(name)) return m;
-    if (value.startsWith("[REDACTED")) return m;
+  out = redactAssignments(out, () => {
     count += 1;
-    return `${name}${nameQ}${sep}${q}[REDACTED]${q}`;
   });
   return { text: out, count };
 }
