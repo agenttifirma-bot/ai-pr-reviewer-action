@@ -61,3 +61,24 @@ test("redacts values of quoted key names (JSON and YAML)", () => {
   assert.doesNotMatch(yaml.text, /hunter2|s3cr3tvalue/);
   assert.match(yaml.text, /^'password': '\[REDACTED\]'/);
 });
+
+test("long key-like words do not cause quadratic backtracking", () => {
+  const inputs = [
+    "key".repeat(100000),
+    "keytoken".repeat(37500),
+    "key" + " ".repeat(300000) + "x",
+    "key=" + "a".repeat(300000),
+  ];
+  for (const input of inputs) {
+    const start = process.hrtime.bigint();
+    redact(input);
+    const ms = Number(process.hrtime.bigint() - start) / 1e6;
+    assert.ok(ms < 1000, `redact took ${ms} ms for ${input.length} chars`);
+  }
+});
+
+test("assignment redaction still needs a secret word in the name", () => {
+  assert.equal(redact("api_key=abcdefgh").text, "api_key=[REDACTED]");
+  assert.equal(redact("MY_TOKEN: 'abcdefgh'").text, "MY_TOKEN: '[REDACTED]'");
+  assert.equal(redact("color=abcdefgh").text, "color=abcdefgh");
+});

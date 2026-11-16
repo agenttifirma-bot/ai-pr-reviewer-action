@@ -11,7 +11,10 @@ const RULES = [
   [/\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g, "[REDACTED jwt]"],
   [/\bBearer\s+[A-Za-z0-9._~+/-]{20,}=*/g, "Bearer [REDACTED]"],
 ];
-const ASSIGNMENT = /\b([A-Za-z0-9_]*(?:key|token|secret|password|passwd|pwd)[A-Za-z0-9_]*)(["']?)(\s*[:=]\s*)(["']?)([^\s"',;]{6,})\4/gi;
+// The name is matched as one plain word and checked against SECRET_WORD in the callback. Putting the keyword
+// inside the regex between two [A-Za-z0-9_]* runs backtracks quadratically on long key-like words.
+const ASSIGNMENT = /\b([A-Za-z0-9_]+)(["']?)(\s*[:=]\s*)(["']?)([^\s"',;]{6,})\4/g;
+const SECRET_WORD = /key|token|secret|password|passwd|pwd/i;
 
 /** @returns {{text: string, count: number}} */
 export function redact(text) {
@@ -24,6 +27,7 @@ export function redact(text) {
     });
   }
   out = out.replace(ASSIGNMENT, (m, name, nameQ, sep, q, value) => {
+    if (!SECRET_WORD.test(name)) return m;
     if (value.startsWith("[REDACTED")) return m;
     count += 1;
     return `${name}${nameQ}${sep}${q}[REDACTED]${q}`;
