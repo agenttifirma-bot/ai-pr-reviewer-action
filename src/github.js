@@ -7,6 +7,14 @@ export class GitHubError extends Error {
   }
 }
 
+/** The account a workflow's default GITHUB_TOKEN comments as. */
+export const OWN_BOT_LOGIN = "github-actions[bot]";
+
+function isOwnBotComment(c) {
+  const u = c?.user;
+  return u?.type === "Bot" && typeof u.login === "string" && u.login.toLowerCase() === OWN_BOT_LOGIN;
+}
+
 export function client({ token, apiUrl = "https://api.github.com", fetchImpl = fetch }) {
   const base = new URL(apiUrl);
   if (base.protocol !== "https:" && !(base.hostname === "localhost" || base.hostname === "127.0.0.1")) throw new GitHubError("github_api_must_be_https");
@@ -46,13 +54,13 @@ export function client({ token, apiUrl = "https://api.github.com", fetchImpl = f
       }
       return { files, truncated: true };
     },
-    /** Comments written by bot accounts only: a human cannot plant the marker to switch reviews off. */
+    /** Comments written by the action's own bot account only: neither a human nor another app can plant the marker. */
     async listBotComments(owner, repo, number) {
       const all = [];
       for (let page = 1; page <= MAX_COMMENT_PAGES; page++) {
         const part = await call(`/repos/${owner}/${repo}/issues/${number}/comments?per_page=100&page=${page}`);
         if (!Array.isArray(part)) throw new GitHubError("github_bad_reply");
-        all.push(...part.filter((c) => c?.user?.type === "Bot"));
+        all.push(...part.filter(isOwnBotComment));
         if (part.length < 100) break;
       }
       return all;

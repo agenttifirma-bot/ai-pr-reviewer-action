@@ -45,7 +45,7 @@ export function fakeNet({ files = [{ filename: "src/app.js", status: "modified",
     if (/\/pulls\/\d+\/files/.test(u)) return json(files);
     if (/\/issues\/\d+\/comments/.test(u) && (init.method ?? "GET") === "GET") return json(state.comments);
     if (/\/issues\/\d+\/comments/.test(u) && init.method === "POST") {
-      const c = { id: state.nextId++, body: body.body, user: { type: "Bot" } };
+      const c = { id: state.nextId++, body: body.body, user: { type: "Bot", login: "github-actions[bot]" } };
       state.comments.push(c);
       return json(c, 201);
     }

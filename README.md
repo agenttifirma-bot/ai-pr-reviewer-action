@@ -76,7 +76,7 @@ The ceiling is in tokens, not dollars: tokens are known before the call, dollar 
 - **Untrusted text.** The diff goes to the model in a `<data>` block that cannot be closed from the inside, without tools. The model's text is sanitized: no links, HTML, images or @-mentions.
 - **The model's claims are checked by code.** A finding is accepted only if the file was included and the line is an added line the model saw. Others are dropped and the comment says how many.
 - **"I do not know" is an accepted answer.** The model may answer `unknown`, and the comment then says plainly that it is not an assessment of the PR.
-- **Limits live in code.** Token ceilings, runs per PR, response size and timeout cannot be changed by the model or by PR content. Redirects are not followed (the key never travels to another server), and the `runs`/`sha` marker in a comment is accepted only from bot accounts' comments, so a human cannot switch the review off with a comment.
+- **Limits live in code.** Token ceilings, runs per PR, response size and timeout cannot be changed by the model or by PR content. Redirects are not followed (the key never travels to another server), and the `runs`/`sha` marker in a comment is accepted only from comments by the action's own bot account (`github-actions[bot]`, the author of comments made with the default `GITHUB_TOKEN`), so neither a human nor another app can switch the review off with a comment.
 
 ## Limitations
 
@@ -108,7 +108,7 @@ Requires Node.js 22 or newer (`engines` in `package.json`); CI runs the tests on
 npm test      # node --test "test/*.test.js"
 ```
 
-179 tests run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
+182 tests run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
 
 ## License
 

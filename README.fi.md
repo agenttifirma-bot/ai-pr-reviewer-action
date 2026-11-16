@@ -74,7 +74,7 @@ Katto on tokeneissa, ei dollareissa: tokenit tiedetään ennen kutsua, dollarihi
 - **Epäluotettava teksti.** Diff menee mallille `<data>`-lohkossa, jota ei voi sulkea sisältäpäin, ilman työkaluja. Mallin teksti puhdistetaan: ei linkkejä, HTML:ää, kuvia eikä @-mainintoja.
 - **Mallin väitteet tarkistetaan koodilla.** Löydös hyväksytään vain, jos tiedosto oli mukana ja rivi on lisätty rivi, jonka malli näki. Muut pudotetaan ja kommentti kertoo montako.
 - **"En tiedä" on hyväksytty vastaus.** Malli saa vastata `unknown`, ja kommentti sanoo silloin suoraan, ettei se ole arvio PR:stä.
-- **Rajat ovat koodissa.** Tokenkatot, ajokerrat per PR, vastauksen koko ja aikakatkaisu eivät ole mallin tai PR:n sisällön muutettavissa. Uudelleenohjauksia ei seurata (avain ei kulje toiselle palvelimelle), ja kommentin merkin `runs`/`sha` hyväksytään vain bot-tilien kommenteista, joten ihminen ei voi sammuttaa tarkistusta kommentilla.
+- **Rajat ovat koodissa.** Tokenkatot, ajokerrat per PR, vastauksen koko ja aikakatkaisu eivät ole mallin tai PR:n sisällön muutettavissa. Uudelleenohjauksia ei seurata (avain ei kulje toiselle palvelimelle), ja kommentin merkin `runs`/`sha` hyväksytään vain Actionin oman bottitilin (`github-actions[bot]`, oletuksena `GITHUB_TOKEN`-tunnuksella kirjoitettujen kommenttien tekijä) kommenteista, joten ihminen tai toinen sovellus ei voi sammuttaa tarkistusta kommentilla.
 
 ## Rajoitukset
 
@@ -106,7 +106,7 @@ Vaatii Node.js 22 tai uudemman (`engines` kohdassa `package.json`); CI ajaa test
 npm test      # node --test "test/*.test.js"
 ```
 
-179 testiä ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
+182 testiä ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
 
 ## Lisenssi
 
