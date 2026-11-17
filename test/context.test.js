@@ -190,3 +190,14 @@ test("diff: an empty context line inside the hunk (stripped to empty) still matc
   assert.ok(out.includes("2:"), out);
   assert.ok(!text.includes("new"));
 });
+
+test("diff: a secret cut by the line length limit does not leave a readable prefix in the context", () => {
+  const secret = ["sk", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"].join("-"); // built in parts: the repo scan forbids key-like literals
+  // The cut (400 chars) falls in the middle of the secret: 13 chars of it would survive and be too short for redact().
+  const long = `x = "${"a ".repeat(186)}" + token = ${secret}`;
+  const lines = ["line1", long, "function f(x) {", "  const a = 1;", "  const b = g(x);"];
+  const patch = "@@ -3,2 +3,3 @@\n function f(x) {\n   const a = 1;\n+  const b = g(x);";
+  const out = numberedPatchWithContext(patch, `${lines.join("\n")}\n`, 2, 400);
+  assert.ok(out.includes("2:  x = "), "the long line is still shown");
+  assert.ok(!out.includes("sk-"), "no part of the cut secret is sent");
+});

@@ -22,8 +22,9 @@ Muuta:
 - Uudet rajatapaustestit `redact`-, `render`- ja `parseMarker`-toiminnoille (`test/edges.test.js`). Kaksi niistä on merkitty todo-tilaan tunnetuiksi aukoiksi: `;`-merkin jälkeinen osa arvosta ei peity, eikä pienellä kirjoitettu `bearer <token>` peity. README:n testimäärä on 179 (aiemmin 130) (00a3466).
 - Offline-injektiosarjan tulokset lisättiin tiedostoon `injektio/RESULTS.md`, ja README viittaa niihin. Tulokset ovat kahdelta tekaistulta mallilta (koodia, ei kielimalleja), joten ne eivät kerro oikeiden mallien käytöksestä (1ecdf82).
 - README:n kilpailijavertailun PR-Agent-linkki osoittaa uuteen osoitteeseen `The-PR-Agent/pr-agent` sekä englannin- että suomenkielisessä README:ssä (0933f2c).
+- Kontekstirivin katkaisu 400 merkkiin pudottaa myös katkaisukohdassa kesken jääneen sanan, jotta katkennut salaisuus ei lähde mallille lukukelpoisena alkuna (`redact()` ei tunnista liian lyhyttä pätkää). Testi lisätty (`test/context.test.js`).
 
-Testejä on yhteensä 202, joista 200 menee läpi ja 2 on todo-tilassa.
+Testejä on yhteensä 203, joista 201 menee läpi ja 2 on todo-tilassa.
 
 ## 0.1.2 (6.11.2026)
 

@@ -67,6 +67,16 @@ export function numberedPatch(patch) {
   return out.join("\n");
 }
 
+/**
+ * Cuts a line to max chars. A word left half-way by the cut is dropped as well: a cut secret may be too short for
+ * redact() to recognise, and the readable prefix of it would be sent to the model.
+ */
+function cutLine(text, max) {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  return /\s/.test(text[max]) ? cut : cut.replace(/\S+$/, "");
+}
+
 const HUNK = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/;
 
 /**
@@ -114,7 +124,7 @@ export function numberedPatchWithContext(patch, fileText, n, maxLineChars = 400)
   const show = (from, to) => {
     if (from > to) return [];
     const out = ["[unchanged lines from the head commit, context only]"];
-    for (let i = from; i <= to; i++) out.push(`${i}:  ${lines[i - 1].slice(0, maxLineChars)}`);
+    for (let i = from; i <= to; i++) out.push(`${i}:  ${cutLine(lines[i - 1], maxLineChars)}`);
     out.push("[end context]");
     return out;
   };
