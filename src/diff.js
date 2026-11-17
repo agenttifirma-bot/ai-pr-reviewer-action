@@ -87,21 +87,29 @@ export function numberedPatchWithContext(patch, fileText, n, maxLineChars = 400)
     if (m) {
       const start = Number(m[1]);
       const count = m[2] === undefined ? 1 : Number(m[2]);
-      // count 0 (pure deletion): the new range is empty and sits after line `start`
-      hunks.push({ rows: [raw], first: count === 0 ? start + 1 : start, last: start + count - 1 });
+      // count 0 (pure deletion): the new range is empty and sits after line `start`, so the context before the
+      // hunk ends at `start` and the context after it begins at `start + 1`. last = start keeps them apart.
+      hunks.push({ rows: [raw], count, first: count === 0 ? start + 1 : start, last: count === 0 ? start : start + count - 1 });
     } else if (hunks.length) hunks.at(-1).rows.push(raw);
   }
   if (hunks.length === 0) return null;
   // The patch lines must be the file lines at the stated numbers, otherwise the context would be from another version.
   for (const h of hunks) {
     let line = h.first;
+    let extra = 0;
     for (const raw of h.rows.slice(1)) {
       const t = raw.replace(/\r$/, "");
       if (t.startsWith("-") || t.startsWith("\\")) continue;
+      // Empty row after the last new-side line (patch ends in a newline): not a file line, ignore it.
+      if (t === "" && line >= h.first + h.count) {
+        extra += 1;
+        continue;
+      }
       if (lines[line - 1] !== t.slice(1)) return null;
       line += 1;
     }
     if (h.last > total) return null;
+    if (extra) h.rows = h.rows.slice(0, h.rows.length - extra);
   }
   const show = (from, to) => {
     if (from > to) return [];

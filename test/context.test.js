@@ -155,3 +155,38 @@ test("at most 20 files get a contents read", async () => {
   assert.equal(contentsCalls(r.net).length, 20);
   assert.equal(r.result.outcome, "reviewed");
 });
+
+test("diff: pure deletion hunk (count 0) shows the line at the cut once, not twice", () => {
+  // Old lines 4-5 were removed; in the new file line 3 is followed by line 4 ("line6").
+  const text = ["l1", "l2", "l3", "l6", "l7", "l8"].join("\n");
+  const patch = "@@ -4,2 +3,0 @@\n-l4\n-l5";
+  const out = numberedPatchWithContext(patch, text, 2);
+  const nums = out.split("\n").map((l) => /^(\d+):/.exec(l)?.[1]).filter(Boolean);
+  assert.deepEqual(nums, ["2", "3", "4", "5"], out);
+  assert.equal(out.split("\n").filter((l) => l.startsWith("3:")).length, 1);
+});
+
+test("diff: two pure deletion hunks next to each other keep order and do not repeat lines", () => {
+  const text = ["a", "b", "c", "d", "e", "f"].join("\n");
+  const patch = "@@ -2,1 +1,0 @@\n-x\n@@ -5,1 +3,0 @@\n-y";
+  const out = numberedPatchWithContext(patch, text, 5);
+  const nums = out.split("\n").map((l) => /^(\d+):/.exec(l)?.[1]).filter(Boolean).map(Number);
+  assert.deepEqual(nums, [1, 2, 3, 4, 5, 6], out);
+});
+
+test("diff: a patch that ends in a newline still gets context and no phantom line", () => {
+  const out = numberedPatchWithContext(`${PATCH}\n`, FILE, 1);
+  assert.ok(out, "context dropped because of the trailing newline");
+  assert.equal(out.split("\n").filter((l) => /^\d+: *$/.test(l)).length, 0, out);
+  assert.equal(out, numberedPatchWithContext(PATCH, FILE, 1));
+});
+
+test("diff: an empty context line inside the hunk (stripped to empty) still matches", () => {
+  const text = ["a", "", "b", "c"].join("\n");
+  const patch = "@@ -1,3 +1,4 @@\n a\n\n+new\n b";
+  const textWith = ["a", "", "new", "b", "c"].join("\n");
+  const out = numberedPatchWithContext(patch, textWith, 1);
+  assert.ok(out);
+  assert.ok(out.includes("2:"), out);
+  assert.ok(!text.includes("new"));
+});
