@@ -61,3 +61,48 @@ test("redacts values of quoted key names (JSON and YAML)", () => {
   assert.doesNotMatch(yaml.text, /hunter2|s3cr3tvalue/);
   assert.match(yaml.text, /^'password': '\[REDACTED\]'/);
 });
+
+test("long key-like words do not cause quadratic backtracking", () => {
+  const inputs = [
+    "key".repeat(100000),
+    "keytoken".repeat(37500),
+    "key" + " ".repeat(300000) + "x",
+    "key=" + "a".repeat(300000),
+  ];
+  for (const input of inputs) {
+    const start = process.hrtime.bigint();
+    redact(input);
+    const ms = Number(process.hrtime.bigint() - start) / 1e6;
+    assert.ok(ms < 1000, `redact took ${ms} ms for ${input.length} chars`);
+  }
+});
+
+test("assignment redaction still needs a secret word in the name", () => {
+  assert.equal(redact("api_key=abcdefgh").text, "api_key=[REDACTED]");
+  assert.equal(redact("MY_TOKEN: 'abcdefgh'").text, "MY_TOKEN: '[REDACTED]'");
+  assert.equal(redact("color=abcdefgh").text, "color=abcdefgh");
+});
+
+test("a non-secret name does not hide a later secret assignment", () => {
+  assert.equal(redact("user=bob&token=abcdef123").text, "user=bob&token=[REDACTED]");
+  assert.equal(redact("color=x&api_key=abcdefgh").text, "color=x&api_key=[REDACTED]");
+  assert.equal(redact("a=bcdefg&token=secretvalue").text, "a=bcdefg&token=[REDACTED]");
+  assert.equal(redact("user=bobbobbob&token=abcdef123").text, "user=bobbobbob&token=[REDACTED]");
+  // no `&` between the two names
+  assert.equal(redact("color=x/api_key=abcdefgh").text, "color=x/api_key=[REDACTED]");
+  assert.equal(redact("a=b=password=hunter2hunter2").count, 1);
+});
+
+test("secret values may still contain & and =", () => {
+  assert.equal(redact("password=ab&cdefgh").text, "password=[REDACTED]");
+  assert.equal(redact("token=abcdef==").text, "token=[REDACTED]");
+});
+
+test("chained non-secret assignments stay linear", () => {
+  const input = "a=".repeat(150000) + "token=abcdefgh";
+  const start = process.hrtime.bigint();
+  const r = redact(input);
+  const ms = Number(process.hrtime.bigint() - start) / 1e6;
+  assert.ok(r.text.endsWith("token=[REDACTED]"));
+  assert.ok(ms < 1000, `redact took ${ms} ms`);
+});
