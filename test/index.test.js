@@ -185,6 +185,16 @@ test("http base URLs for the model are refused (key would travel in clear text)"
   assert.equal(net.llmCalls().length, 0);
 });
 
+test("bad base URL fails before any reservation: no comment, no run counter, no GitHub write", async () => {
+  for (const url of ["http://example.com", "not a url", "https://user:pw@llm.example/v1"]) {
+    const net = fakeNet({ reply: okReply() });
+    await assert.rejects(go(net, baseEnv({ "INPUT_BASE-URL": url })), (e) => typeof e.code === "string" && e.code.startsWith("llm_"));
+    assert.equal(net.state.comments.length, 0, url);
+    assert.equal(net.llmCalls().length, 0, url);
+    assert.equal(net.calls.filter((c) => c.method && c.method !== "GET").length, 0, url);
+  }
+});
+
 test("with several earlier bot comments the newest one decides", async () => {
   const net = fakeNet({
     comments: [

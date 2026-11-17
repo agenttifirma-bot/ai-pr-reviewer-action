@@ -2,12 +2,28 @@
 
 ## Julkaisematon
 
+Muutokset, jotka ovat masterissa tagin v0.1.2 jälkeen mutta eivät vielä julkaistussa versiossa.
+
+Korjattu (tietoturva):
+
+- PR:n otsikko siirrettiin `<data>`-lohkon sisään rivin `PR TITLE:` alle. Aiemmin otsikko lähetettiin lohkon ulkopuolella, vaikka sen kirjoittaa PR:n tekijä. Nyt se normalisoidaan ja puhdistetaan (defang) kuten diff, ja järjestelmäkehote kertoo, että myös otsikkorivi on epäluotettavaa tekstiä. Uusi testi varmistaa, että otsikkoon upotettu `</data>` ei sulje lohkoa (234d9c0).
+- Virheellinen `base-url` (http-osoite, jäsentymätön osoite tai osoite, jossa on tunnus ja salasana) hylätään nyt ennen ajokerran varausta. Aiemmin tarkistus tehtiin vasta varauksen jälkeen, joten virheellinen osoite saattoi jättää varauskommentin ja kuluttaa ajokerran. Uusi testi varmistaa, ettei kommenttia, mallikutsua eikä GitHub-kirjoitusta synny (3548b42).
+
 Lisätty:
 
 - Uusi valinnainen syöte `context-lines` (oletus 0 = pois, enintään 20). Kun arvo on suurempi kuin 0, jokaisen muutoslohkon ympärille liitetään enintään näin monta muuttumatonta riviä molemmin puolin. Rivit luetaan head-commitista contents-rajapinnalla (vain GET, enintään 20 tiedostoa ajoa kohden) ja merkitään kehotteessa kontekstiksi. Tausta: tarkastaja näki pelkän patchin ja saattoi hylätä koodin sillä perusteella, että funktio näytti katkeavan.
 - Kontekstirivit lasketaan `max-input-tokens`-katon sisään ja siivotaan (`redact`) kuten diff. Jos ne eivät mahdu, luku epäonnistuu tai tiedoston sisältö ei vastaa patchia, tiedosto tarkistetaan pelkällä patchilla. Lokiin kirjataan vain virheen tyyppi ja HTTP-tila.
 - Oletus 0 ei muuta kehotetta eikä pyyntöjä lainkaan. Järjestelmäkehotteeseen lisätään kontekstia koskeva huomautus vain, jos jokin tiedosto sai kontekstia.
 - Rajat: `limits.js`:n olemassa olevia arvoja ei muutettu. Uudet vakiot: `MAX_CONTEXT_LINES` (20), `MAX_CONTEXT_FILES` (20), `MAX_CONTEXT_LINE_CHARS` (400).
+
+Muuta:
+
+- README on nyt englanniksi, ja suomenkielinen versio on tiedostossa `README.fi.md`. Kielivaihtolinkki on README:n alussa, ja testi 118 lukee Asetukset-taulukon molemmista tiedostoista ja tarkistaa versioviitteet myös `README.fi.md`:stä (a501ec0).
+- Uudet rajatapaustestit `redact`-, `render`- ja `parseMarker`-toiminnoille (`test/edges.test.js`). Kaksi niistä on merkitty todo-tilaan tunnetuiksi aukoiksi: `;`-merkin jälkeinen osa arvosta ei peity, eikä pienellä kirjoitettu `bearer <token>` peity. README:n testimäärä on 179 (aiemmin 130) (00a3466).
+- Offline-injektiosarjan tulokset lisättiin tiedostoon `injektio/RESULTS.md`, ja README viittaa niihin. Tulokset ovat kahdelta tekaistulta mallilta (koodia, ei kielimalleja), joten ne eivät kerro oikeiden mallien käytöksestä (1ecdf82).
+- README:n kilpailijavertailun PR-Agent-linkki osoittaa uuteen osoitteeseen `The-PR-Agent/pr-agent` sekä englannin- että suomenkielisessä README:ssä (0933f2c).
+
+Testejä on yhteensä 198, joista 196 menee läpi ja 2 on todo-tilassa.
 
 ## 0.1.2 (6.11.2026)
 

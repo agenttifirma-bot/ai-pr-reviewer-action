@@ -4,7 +4,7 @@ import { contextExtraTokens, cost, select } from "./budget.js";
 import { addedLines, numberedPatch, numberedPatchWithContext, skipReason } from "./diff.js";
 import { client, GitHubError } from "./github.js";
 import { DEFAULTS, HARD_CAPS, MAX_CONTEXT_FILES, MAX_CONTEXT_LINE_CHARS, MAX_CONTEXT_LINES } from "./limits.js";
-import { chat, LLMError } from "./llm.js";
+import { chat, checkBaseUrl, LLMError } from "./llm.js";
 import { buildUserMessage, CONTEXT_NOTE, SYSTEM_PROMPT } from "./prompt.js";
 import { redact } from "./redact.js";
 import { marker, parseMarker, render } from "./render.js";
@@ -57,6 +57,8 @@ export async function run({ env = process.env, fetchImpl = fetch, log = console 
   const baseUrl = input(env, "base-url");
   const model = input(env, "model");
   if (!baseUrl || !model) throw new ConfigError("base_url_and_model_required");
+  // Validate before any GitHub write: a bad base-url must not leave a reservation comment or burn a run.
+  checkBaseUrl(baseUrl);
   const maxInputTokens = intInput(env, "max-input-tokens", DEFAULTS.maxInputTokens, HARD_CAPS.maxInputTokens);
   const maxOutputTokens = intInput(env, "max-output-tokens", DEFAULTS.maxOutputTokens, HARD_CAPS.maxOutputTokens);
   const maxRuns = intInput(env, "max-runs-per-pr", DEFAULTS.maxRunsPerPr, HARD_CAPS.maxRunsPerPr);
