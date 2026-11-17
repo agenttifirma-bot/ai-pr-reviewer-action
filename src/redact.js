@@ -16,7 +16,8 @@ const RULES = [
 // name never swallows a later secret assignment (`user=bob&token=abcdef123`). Putting the keyword inside one
 // regex between two [A-Za-z0-9_]* runs backtracks quadratically on long key-like words.
 const PREFIX = /\b([A-Za-z0-9_]+)(["']?)(\s*[:=]\s*)(["']?)/g;
-const VALUE = /[^\s"',;]{6,}/y;
+// A `;` belongs to the value when another value character follows it; a trailing `;` stays outside.
+const VALUE = /(?:[^\s"',;]|;(?=[^\s"',;])){6,}/y;
 const SECRET_WORD = /key|token|secret|password|passwd|pwd/i;
 
 function redactAssignments(input, onHit) {

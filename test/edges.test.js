@@ -32,11 +32,17 @@ test("redact: a value ending in ; or , keeps the terminator outside the redactio
   assert.equal(redact("password=abcdef;").count, 1);
 });
 
-// Known gap (not locked as expected behaviour): the value stops at the first ';',
-// so the part after it is left visible. Marked todo until the redact rule is fixed.
-test("redact: the part of a value after ';' should also be hidden", { todo: "known redact gap" }, () => {
+test("redact: the part of a value after ';' is also hidden", () => {
   const r = redact("password=abc;def123");
   assert.doesNotMatch(r.text, /def123/);
+});
+
+test("redact: ';' in other positions stays inside the value, a trailing ';' stays outside", () => {
+  assert.equal(redact("token=abcdef;ghijkl").text, "token=[REDACTED]");
+  assert.equal(redact("token=;abcdef;ghi").text, "token=[REDACTED]");
+  assert.equal(redact('secret="ab;cdef123"').text, 'secret="[REDACTED]"');
+  assert.equal(redact("password=abcdef;;").text, "password=[REDACTED];;");
+  assert.equal(redact("password=abcdef; next=1").text, "password=[REDACTED]; next=1");
 });
 
 test("redact: a value stops at the line end and the next line is untouched", () => {
