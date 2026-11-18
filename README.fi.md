@@ -45,6 +45,19 @@ Esimerkkitiedosto estää myös päällekkäiset ajot (`concurrency`), jättää
 
 Tietoturvakäytäntö ja uhkamalli: katso [`SECURITY.md`](SECURITY.md) (englanniksi).
 
+## Laatu
+
+[`eval/`](eval/README.md) mittaa, löytääkö tarkastaja tunnetut viat ja montako väärää hälytystä se antaa: 17 pientä itse kirjoitettua diffiä (12 diffissä yhteensä 13 tunnettua vikaa, 5 puhdasta), pisteytys mekaanisesti (sama tiedosto, rivi enintään yhden päässä, viestissä avainsana). Mallin vastaukset tallennetaan nauhoiksi kansioon `eval/nauhat/`, joten CI toistaa ne oikean `run()`-polun läpi ilman verkkokutsuja ja avaimia.
+
+**Yhtään kielimallia ei ole vielä mitattu.** Ainoat nauhat ovat kahdesta keinomallista (koodia, ei malleja). Ne osoittavat, että mittari toimii, ja antavat alarajan, joka mallin pitää ylittää:
+
+| Nauha | Löydetyt viat | Väärät hälytykset | Puhtaat diffit ilman löydöksiä |
+|---|---|---|---|
+| keinomalli-saantopohja (7 säännöllistä lauseketta, vertailutaso) | 7/13 | 1 | 4/5 |
+| keinomalli-viite (palauttaa odotetut vastaukset, tarkistus) | 13/13 | 0 | 5/5 |
+
+Toisto: `node eval/aja.js`. Oikean mallin nauhoitus vaatii oman avaimen (katso [`eval/README.md`](eval/README.md)).
+
 ## Prompt injection -testisarja
 
 Katso [`injektio/README.md`](injektio/README.md) (suomeksi): 19 tapausta (OWASP LLM01/LLM06), kanariamittari ja ajuri, joka kirjaa tulokset `kokeilut.jsonl`-muotoon.
@@ -108,7 +121,7 @@ Vaatii Node.js 22 tai uudemman (`engines` kohdassa `package.json`); CI ajaa test
 npm test      # node --test "test/*.test.js"
 ```
 
-193 testiä ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
+207 testiä ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
 
 ## Lisenssi
 
