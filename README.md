@@ -112,7 +112,7 @@ Requires Node.js 22 or newer (`engines` in `package.json`); CI runs the tests on
 npm test      # node --test "test/*.test.js"
 ```
 
-The suite has 195 tests: 193 pass and 2 are marked `todo` (known gaps), with no failures. They run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
+The suite has 195 tests: 194 pass and 1 is marked `todo` (a known gap, see above), with no failures. They run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
 
 ## License
 

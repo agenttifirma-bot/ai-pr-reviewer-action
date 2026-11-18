@@ -75,9 +75,8 @@ test("redact: all allowed Bearer characters (. _ ~ + / - =) are covered, and a t
   assert.equal(redact(`Bearer\t${pad(20)}`).text, "Bearer [REDACTED]");
 });
 
-// Known gap: the Authorization scheme is case-insensitive (RFC 9110), but the rule only
-// matches 'Bearer'. Marked todo so the gap is documented without being locked in.
-test("redact: a lowercase 'bearer <token>' should also be redacted", { todo: "known redact gap" }, () => {
+// The Authorization scheme is case-insensitive (RFC 9110), so the rule also matches 'bearer'.
+test("redact: a lowercase 'bearer <token>' should also be redacted", () => {
   const r = redact(`bearer ${pad(20)}`);
   assert.equal(r.count, 1);
 });

@@ -110,7 +110,7 @@ Vaatii Node.js 22 tai uudemman (`engines` kohdassa `package.json`); CI ajaa test
 npm test      # node --test "test/*.test.js"
 ```
 
-Testejä on 195: 193 menee läpi ja 2 on merkitty `todo`-tilaan (tunnetut aukot), eikä yksikään kaadu. Ne ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
+Testejä on 195: 194 menee läpi ja 1 on merkitty `todo`-tilaan (tunnettu aukko, ks. yllä), eikä yksikään kaadu. Ne ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
 
 ## Lisenssi
 
