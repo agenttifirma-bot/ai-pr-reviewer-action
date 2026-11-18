@@ -62,6 +62,31 @@ test("redact: a ';' before another assignment ends the value, so the next secret
   }
 });
 
+test("redact: the next secret name may have a dot, a dash or a prefix; the ';' still ends the value", () => {
+  const cases = [
+    ["token=abcdef;db.password= hunter2xyz", "token=[REDACTED];db.password= [REDACTED]", 2],
+    ["token=abcdef;my-password= hunter2xyz", "token=[REDACTED];my-password= [REDACTED]", 2],
+    ["token=abcdef;-password= hunter2xyz", "token=[REDACTED];-password= [REDACTED]", 2],
+    ["token=abcdef;db.password='hunter2xyz'", "token=[REDACTED];db.password='[REDACTED]'", 2],
+    ['token=abcdef;my-password="hunter2xyz"', 'token=[REDACTED];my-password="[REDACTED]"', 2],
+    ["token=abcdef;-password:hunter2xyz", "token=[REDACTED];-password:[REDACTED]", 2],
+    ["token=abcdef;db.password = hunter2xyz", "token=[REDACTED];db.password = [REDACTED]", 2],
+  ];
+  for (const [input, text, count] of cases) {
+    const r = redact(input);
+    assert.equal(r.text, text, input);
+    assert.equal(r.count, count, input);
+    assert.doesNotMatch(r.text, /hunter2xyz/, input);
+  }
+});
+
+test("redact: a long run of ';' separated parts stays fast", () => {
+  const t = Date.now();
+  const r = redact("token=" + "abcdefg;".repeat(20000));
+  assert.equal(r.count, 1);
+  assert.ok(Date.now() - t < 2000);
+});
+
 test("redact: ';' followed by plain text (no assignment) still joins the value into one match", () => {
   const r = redact("token=abcdef;ghijkl;mnopqr");
   assert.equal(r.text, "token=[REDACTED]");

@@ -16,10 +16,13 @@ const RULES = [
 // name never swallows a later secret assignment (`user=bob&token=abcdef123`). Putting the keyword inside one
 // regex between two [A-Za-z0-9_]* runs backtracks quadratically on long key-like words.
 const PREFIX = /\b([A-Za-z0-9_]+)(["']?)(\s*[:=]\s*)(["']?)/g;
-// A `;` belongs to the value when another value character follows it, unless what follows is the start of
-// another assignment (`name<quote?><sep>`): then the `;` ends the value, so the next assignment is still found
-// by PREFIX and checked. A trailing `;` stays outside.
-const VALUE = /(?:[^\s"',;]|;(?=[^\s"',;])(?![A-Za-z0-9_]+["']?\s*[:=])){6,}/y;
+// A `;` belongs to the value when another value character follows it, unless an assignment starts inside the
+// text after it. PREFIX finds a name at any word boundary, so the lookahead does the same: from the `;` it skips
+// up to the next terminator (whitespace, quote, `,`, `;`, `=` or `:`), then needs a name character, an optional
+// quote, optional spaces and a separator (`db.password=`, `my-password:`, `-password=`). Then the `;` ends the
+// value, so the next assignment is still found by PREFIX and checked. A trailing `;` stays outside. The skip
+// stops at the next `;`, so the scan stays linear.
+const VALUE = /(?:[^\s"',;]|;(?=[^\s"',;])(?![^\s"',;=:]*[A-Za-z0-9_]["']?\s*[:=])){6,}/y;
 const SECRET_WORD = /key|token|secret|password|passwd|pwd/i;
 
 function redactAssignments(input, onHit) {
