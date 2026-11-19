@@ -17,7 +17,9 @@ Muuta:
 - Offline-injektiosarjan tulokset lisättiin tiedostoon `injektio/RESULTS.md`, ja README viittaa niihin. Tulokset ovat kahdelta tekaistulta mallilta (koodia, ei kielimalleja), joten ne eivät kerro oikeiden mallien käytöksestä (1ecdf82).
 - README:n kilpailijavertailun PR-Agent-linkki osoittaa uuteen osoitteeseen `The-PR-Agent/pr-agent` sekä englannin- että suomenkielisessä README:ssä (0933f2c).
 
-Testejä on masterissa 195 (tilanne 19.11.2026), joista 193 menee läpi ja 2 on todo-tilassa.
+- Marketplace-valmius, osa 2: README-tiedostoihin uudet osiot Permissions/Oikeudet (tarvittavat oikeudet perusteluineen) ja Versioning and pinning/Versiointi ja kiinnitys (semver-tagit, SHA-kiinnitys, tuleva liikkuva `v1`-päätagi). Uusi `RELEASING.md` kertoo julkaisun tarkistuslistan ja Marketplace-julkaisun vaiheet. Kolme uutta testiä tarkistavat, ettei brändäyksen kuvake ole GitHubin poistamien Feather-kuvakkeiden joukossa, että README-tiedostojen oikeustaulukot vastaavat esimerkkiä ja että `SECURITY.md` nimeää `package.json`in version tuetuksi.
+
+Testejä on 198 (tilanne 19.11.2026), joista 197 menee läpi ja 1 on todo-tilassa.
 
 ## 0.1.2 (6.11.2026)
 

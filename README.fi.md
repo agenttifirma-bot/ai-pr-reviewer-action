@@ -45,6 +45,33 @@ Esimerkkitiedosto estää myös päällekkäiset ajot (`concurrency`), jättää
 
 Tietoturvakäytäntö ja uhkamalli: katso [`SECURITY.md`](SECURITY.md) (englanniksi).
 
+## Oikeudet
+
+Actionia käyttävä työnkulku tarvitsee täsmälleen nämä oikeudet:
+
+| Oikeus | Miksi |
+| --- | --- |
+| `contents: read` | Pull requestin muuttuneet tiedostot luetaan GitHubin rajapinnasta. Mitään ei haeta levylle. |
+| `pull-requests: write` | Yksi tarkistuskommentti kirjoitetaan ja sitä päivitetään paikallaan. |
+
+Älä anna enempää (esimerkiksi `write-all`). Käytä `pull_request`-tapahtumaa: Action kieltäytyy toimimasta `pull_request_target`-tapahtumassa.
+
+## Versiointi ja kiinnitys
+
+Julkaisut noudattavat semanttista versiointia, ja niiden tagit ovat muotoa `vX.Y.Z` (katso [`CHANGELOG.md`](CHANGELOG.md)). Ennen versiota 1.0.0 alaversio voi muuttaa syötteitä. Esimerkit käyttävät tarkkaa julkaisutagia (`@v0.1.2`).
+
+Tagia voi siirtää. Jos uhkamallisi vaatii, kiinnitä sen sijaan julkaisun koko 40-merkkinen commit-SHA ja jätä versio kommenttiin, jotta Dependabot voi yhä päivittää sen:
+
+```yaml
+- uses: tonyweckstrom1987/ai-pr-reviewer-action@<koko-commit-sha> # v0.1.2
+  with:
+    api-key: ${{ secrets.LLM_API_KEY }}
+    base-url: https://openrouter.ai/api/v1
+    model: deepseek/deepseek-chat
+```
+
+Versiosta 1.0.0 alkaen liikkuva päätagi (`v1`) osoittaa uusimpaan `v1.x.y`-julkaisuun. Rikkovat muutokset, kuten poistetut tai uudelleen nimetyt syötteet, saavat uuden pääversion. Julkaisun vaiheet ovat tiedostossa [`RELEASING.md`](RELEASING.md) (englanniksi).
+
 ## Laatu
 
 [`eval/`](eval/README.md) mittaa, löytääkö tarkastaja tunnetut viat ja montako väärää hälytystä se antaa: 17 pientä itse kirjoitettua diffiä (12 diffissä yhteensä 13 tunnettua vikaa, 5 puhdasta), pisteytys mekaanisesti (sama tiedosto, rivi enintään yhden päässä, viestissä avainsana). Mallin vastaukset tallennetaan kaseteiksi kansioon `eval/cassettes/`, joten CI toistaa ne oikean `run()`-polun läpi ilman verkkokutsuja ja avaimia.
@@ -123,7 +150,7 @@ Vaatii Node.js 22 tai uudemman (`engines` kohdassa `package.json`); CI ajaa test
 npm test      # node --test "test/*.test.js"
 ```
 
-Testejä on 209: 208 menee läpi ja 1 on merkitty `todo`-tilaan (tunnettu aukko, ks. yllä), eikä yksikään kaadu. Ne ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
+Testejä on 212: 211 menee läpi ja 1 on merkitty `todo`-tilaan (tunnettu aukko, ks. yllä), eikä yksikään kaadu. Ne ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
 
 ## Lisenssi
 

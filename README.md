@@ -45,6 +45,33 @@ The example file also prevents overlapping runs (`concurrency`), skips draft PRs
 
 Security policy and threat model: see [`SECURITY.md`](SECURITY.md).
 
+## Permissions
+
+The workflow that uses the Action needs exactly these permissions:
+
+| Permission | Why |
+| --- | --- |
+| `contents: read` | Read the pull request's changed files through the GitHub API. Nothing is checked out. |
+| `pull-requests: write` | Write one review comment and update it in place. |
+
+Do not grant more (for example `write-all`). Use the `pull_request` event: the Action refuses to run on `pull_request_target`.
+
+## Versioning and pinning
+
+Releases follow semantic versioning and are tagged `vX.Y.Z` (see [`CHANGELOG.md`](CHANGELOG.md)). Before 1.0.0, a minor version may change inputs. The examples use the exact release tag (`@v0.1.2`).
+
+A tag can be moved. If your threat model needs it, pin the full 40-character commit SHA of a release instead and keep the version in a comment, so Dependabot can still update it:
+
+```yaml
+- uses: tonyweckstrom1987/ai-pr-reviewer-action@<full-commit-sha> # v0.1.2
+  with:
+    api-key: ${{ secrets.LLM_API_KEY }}
+    base-url: https://openrouter.ai/api/v1
+    model: deepseek/deepseek-chat
+```
+
+From 1.0.0 on, a moving major tag (`v1`) will point at the latest `v1.x.y` release. Breaking changes, such as removed or renamed inputs, will get a new major version. The release steps are in [`RELEASING.md`](RELEASING.md).
+
 ## Quality
 
 [`eval/`](eval/README.md) measures whether the reviewer finds known defects and how many false alarms it raises: 17 small hand-written diffs (12 with 13 known defects, 5 clean), scored mechanically (same file, line within 1, a keyword in the message). Model replies are stored as cassettes in `eval/cassettes/`, so CI replays them through the real `run()` path without network calls or keys.
@@ -125,7 +152,7 @@ Requires Node.js 22 or newer (`engines` in `package.json`); CI runs the tests on
 npm test      # node --test "test/*.test.js"
 ```
 
-The suite has 209 tests: 208 pass and 1 is marked `todo` (a known gap, see above), with no failures. They run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
+The suite has 212 tests: 211 pass and 1 is marked `todo` (a known gap, see above), with no failures. They run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
 
 ## License
 
