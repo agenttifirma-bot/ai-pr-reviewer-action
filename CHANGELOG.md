@@ -18,7 +18,7 @@ Muuta:
 
 - Marketplace-valmius, osa 2: README-tiedostoihin uudet osiot Permissions/Oikeudet (tarvittavat oikeudet perusteluineen) ja Versioning and pinning/Versiointi ja kiinnitys (semver-tagit, SHA-kiinnitys, tuleva liikkuva `v1`-päätagi). Uusi `RELEASING.md` kertoo julkaisun tarkistuslistan ja Marketplace-julkaisun vaiheet. Kolme uutta testiä tarkistavat, ettei brändäyksen kuvake ole GitHubin poistamien Feather-kuvakkeiden joukossa, että README-tiedostojen oikeustaulukot vastaavat esimerkkiä ja että `SECURITY.md` nimeää `package.json`in version tuetuksi.
 
-Testejä on 198, joista 196 menee läpi ja 2 on todo-tilassa.
+Testejä on 198 (tilanne 19.11.2026), joista 197 menee läpi ja 1 on todo-tilassa.
 
 ## 0.1.2 (6.11.2026)
 
