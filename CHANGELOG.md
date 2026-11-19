@@ -16,7 +16,7 @@ Muuta:
 - Offline-injektiosarjan tulokset lisättiin tiedostoon `injektio/RESULTS.md`, ja README viittaa niihin. Tulokset ovat kahdelta tekaistulta mallilta (koodia, ei kielimalleja), joten ne eivät kerro oikeiden mallien käytöksestä (1ecdf82).
 - README:n kilpailijavertailun PR-Agent-linkki osoittaa uuteen osoitteeseen `The-PR-Agent/pr-agent` sekä englannin- että suomenkielisessä README:ssä (0933f2c).
 
-Testejä on masterissa 181, joista 179 menee läpi ja 2 on todo-tilassa.
+Testejä on masterissa 195 (tilanne 19.11.2026), joista 193 menee läpi ja 2 on todo-tilassa.
 
 ## 0.1.2 (6.11.2026)
 
