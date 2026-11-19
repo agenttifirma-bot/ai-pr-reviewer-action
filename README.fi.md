@@ -72,14 +72,16 @@ Katto on tokeneissa, ei dollareissa: tokenit tiedetään ennen kutsua, dollarihi
 
 - **Ei PR:n koodia.** Action ei tee checkoutia, ei aja mitään eikä kirjoita tiedostoja. Testi tarkistaa, ettei lähdekoodissa ole `child_process`-, `eval`- tai tiedostokirjoituskutsuja eikä kolmannen osapuolen riippuvuuksia.
 - **`pull_request`, ei `pull_request_target`.** Jälkimmäisellä salaisuudet olisivat käytössä fork-PR:ille, joiden teksti on epäluotettavaa. Action kieltäytyy käynnistymästä `pull_request_target`-tapahtumalla.
-- **Salaisuuksien siivous ennen mallia.** Tunnetut avainmuodot ja `key/token/secret/password`-sijoitukset korvataan, ja `.env`-, avain-, lukko- ja binääritiedostoja ei lähetetä lainkaan. Siivous on regex-pohjainen paras yritys, ei takuu.
+- **Salaisuuksien siivous ennen mallia.** Tunnetut avainmuodot, `Bearer`-tunnisteet (kaikilla kirjainkoilla: `Bearer`, `bearer`, `BEARER`) ja `key/token/secret/password`-sijoitukset korvataan, ja `.env`-, avain-, lukko- ja binääritiedostoja ei lähetetä lainkaan. Sijoitukset tunnistetaan kahdessa lineaarisessa vaiheessa, joten pitkät avaimen näköiset sanat eivät hidasta siivousta. Siivous on regex-pohjainen paras yritys, ei takuu. Arvo päättyy merkkiin `;`, eikä sen jälkeistä osaa peitetä (katso Rajoitukset).
 - **Epäluotettava teksti.** Diff menee mallille `<data>`-lohkossa, jota ei voi sulkea sisältäpäin, ilman työkaluja. Mallin teksti puhdistetaan: ei linkkejä, HTML:ää, kuvia eikä @-mainintoja.
 - **Mallin väitteet tarkistetaan koodilla.** Löydös hyväksytään vain, jos tiedosto oli mukana ja rivi on lisätty rivi, jonka malli näki. Muut pudotetaan ja kommentti kertoo montako.
 - **"En tiedä" on hyväksytty vastaus.** Malli saa vastata `unknown`, ja kommentti sanoo silloin suoraan, ettei se ole arvio PR:stä.
+- **Käytäntö ja uhkamalli.** [`SECURITY.md`](SECURITY.md) (englanniksi) listaa jokaisen suojauksen lähdekoodin sijainteineen, tunnetut rajoitukset ja ohjeen haavoittuvuuden ilmoittamiseen yksityisesti.
 - **Rajat ovat koodissa.** Tokenkatot, ajokerrat per PR, vastauksen koko ja aikakatkaisu eivät ole mallin tai PR:n sisällön muutettavissa. Uudelleenohjauksia ei seurata (avain ei kulje toiselle palvelimelle), ja kommentin merkin `runs`/`sha` hyväksytään vain bot-tilien kommenteista, joten ihminen ei voi sammuttaa tarkistusta kommentilla.
 
 ## Rajoitukset
 
+- Siivous ei tunnista tuntemattomia salaisuusmuotoja. Yksi tunnettu aukko: sijoituksessa `token=abc123;def456` peitetään vain `;`-merkkiä edeltävä osa. Rajatapaustesti kirjaa tämän tunnetuksi aukoksi (`todo`). Suunnittelun muut rajat: [`SECURITY.md`](SECURITY.md) (englanniksi).
 - Malli voi olla väärässä ja jättää löytämättä asioita. Kommentti sanoo itse "can be wrong". Tarkistus lisäksi tarkastaa vain sijainnin, ei sitä onko väite totta.
 - Vain lisätyt rivit ja yksi mallikutsu. Ei repon muuta koodia kontekstina, ei rivikohtaisia kommentteja (yksi yhteenvetokommentti, päivitetään paikallaan), ei keskustelua eikä automaattisia korjauksia.
 - Suuri PR katkaistaan tokenkattoon: tiedostot, jotka eivät mahdu, näkyvät kommentin kohdassa "Not reviewed". Tiedostolistasta luetaan enintään 300 tiedostoa; loput merkitään tarkistamatta jääneiksi.
@@ -108,7 +110,7 @@ Vaatii Node.js 22 tai uudemman (`engines` kohdassa `package.json`); CI ajaa test
 npm test      # node --test "test/*.test.js"
 ```
 
-193 testiä ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
+Testejä on 195: 194 menee läpi ja 1 on merkitty `todo`-tilaan (tunnettu aukko, ks. yllä), eikä yksikään kaadu. Ne ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
 
 ## Lisenssi
 

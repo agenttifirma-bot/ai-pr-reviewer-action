@@ -74,14 +74,16 @@ The ceiling is in tokens, not dollars: tokens are known before the call, dollar 
 
 - **No PR code.** The Action does no checkout, runs nothing and writes no files. A test checks that the source contains no `child_process`, `eval` or file-writing calls and no third-party dependencies.
 - **`pull_request`, not `pull_request_target`.** With the latter, secrets would be available to fork PRs, whose text is untrusted. The Action refuses to start on the `pull_request_target` event.
-- **Secret redaction before the model.** Known key formats and `key/token/secret/password` assignments are replaced, and `.env`, key, lock and binary files are not sent at all. Redaction is a regex-based best effort, not a guarantee.
+- **Secret redaction before the model.** Known key formats, `Bearer` tokens (any letter case: `Bearer`, `bearer`, `BEARER`) and `key/token/secret/password` assignments are replaced, and `.env`, key, lock and binary files are not sent at all. Assignments are matched in two linear steps, so long key-like words cannot make the redaction slow. Redaction is a regex-based best effort, not a guarantee. A value ends at `;`, and the part after `;` is not hidden (see Limitations).
 - **Untrusted text.** The diff goes to the model in a `<data>` block that cannot be closed from the inside, without tools. The model's text is sanitized: no links, HTML, images or @-mentions.
 - **The model's claims are checked by code.** A finding is accepted only if the file was included and the line is an added line the model saw. Others are dropped and the comment says how many.
 - **"I do not know" is an accepted answer.** The model may answer `unknown`, and the comment then says plainly that it is not an assessment of the PR.
+- **Policy and threat model.** [`SECURITY.md`](SECURITY.md) lists each protection with its source location, the known limitations, and how to report a vulnerability privately.
 - **Limits live in code.** Token ceilings, runs per PR, response size and timeout cannot be changed by the model or by PR content. Redirects are not followed (the key never travels to another server), and the `runs`/`sha` marker in a comment is accepted only from bot accounts' comments, so a human cannot switch the review off with a comment.
 
 ## Limitations
 
+- Redaction misses unknown secret formats. One known gap: in an assignment such as `token=abc123;def456` only the part before `;` is hidden. An edge test records this as a known gap (`todo`). Details and other limits of the design: [`SECURITY.md`](SECURITY.md).
 - The model can be wrong and can miss things. The comment itself says "can be wrong". The check also verifies only the location, not whether the claim is true.
 - Added lines only, and one model call. No other repository code as context, no line-by-line comments (one summary comment, updated in place), no conversation and no automatic fixes.
 - A large PR is cut at the token ceiling: files that do not fit appear in the "Not reviewed" section of the comment. At most 300 files are read from the file list; the rest are marked as not reviewed.
@@ -110,7 +112,7 @@ Requires Node.js 22 or newer (`engines` in `package.json`); CI runs the tests on
 npm test      # node --test "test/*.test.js"
 ```
 
-193 tests run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
+The suite has 195 tests: 194 pass and 1 is marked `todo` (a known gap, see above), with no failures. They run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
 
 ## License
 
