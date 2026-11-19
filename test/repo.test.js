@@ -102,3 +102,30 @@ test("examples and README Action references use the package.json version", () =>
     for (const r of refs) assert.equal(r, `v${v}`, f);
   }
 });
+
+test("action.yml: branding icon is not one of the Feather icons GitHub omits", () => {
+  const icon = /^branding:\n  icon: "([a-z-]+)"/m.exec(read("action.yml"))[1];
+  const omitted = ["coffee", "columns", "divide-circle", "divide-square", "divide", "frown", "hexagon", "key", "meh", "mouse-pointer", "smile", "tool", "x-octagon"];
+  assert.ok(!omitted.includes(icon), `${icon} is not available as a Marketplace icon`);
+});
+
+test("README permissions tables match the example workflow (English and Finnish)", () => {
+  const ex = read("examples/review.yml");
+  const perms = [...ex.slice(ex.indexOf("permissions:"), ex.indexOf("\nconcurrency:")).matchAll(/^ {2}([a-z-]+): (read|write)/gm)].map((m) => `${m[1]}: ${m[2]}`);
+  assert.deepEqual(perms, ["contents: read", "pull-requests: write"]);
+  for (const [f, start, end] of [["README.md", "## Permissions", "## Versioning"], ["README.fi.md", "## Oikeudet", "## Versiointi"]]) {
+    const t = read(f);
+    const sec = t.slice(t.indexOf(start), t.indexOf(end));
+    assert.ok(t.includes(start) && t.includes(end), `${f}: section missing`);
+    for (const p of perms) assert.ok(sec.includes(`\`${p}\``), `${f}: ${p}`);
+  }
+});
+
+test("release docs exist and SECURITY.md names the package.json version as supported", () => {
+  const v = JSON.parse(read("package.json")).version;
+  assert.ok(fs.existsSync(path.join(root, "RELEASING.md")));
+  const sec = read("SECURITY.md");
+  const supported = sec.slice(sec.indexOf("## Supported versions"), sec.indexOf("## What the Action"));
+  assert.ok(supported.includes(`\`v${v}\``), "SECURITY.md supported version");
+  for (const f of ["README.md", "README.fi.md"]) assert.ok(read(f).includes("(RELEASING.md)"), f);
+});

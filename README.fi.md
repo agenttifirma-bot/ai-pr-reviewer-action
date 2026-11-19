@@ -43,6 +43,48 @@ Asennus vaihe vaiheelta:
 
 Esimerkkitiedosto estää myös päällekkäiset ajot (`concurrency`), jättää luonnos-PR:t väliin ja keskeyttää työn 5 minuutin kohdalla.
 
+Tietoturvakäytäntö ja uhkamalli: katso [`SECURITY.md`](SECURITY.md) (englanniksi).
+
+## Oikeudet
+
+Actionia käyttävä työnkulku tarvitsee täsmälleen nämä oikeudet:
+
+| Oikeus | Miksi |
+| --- | --- |
+| `contents: read` | Pull requestin muuttuneet tiedostot luetaan GitHubin rajapinnasta. Mitään ei haeta levylle. |
+| `pull-requests: write` | Yksi tarkistuskommentti kirjoitetaan ja sitä päivitetään paikallaan. |
+
+Älä anna enempää (esimerkiksi `write-all`). Käytä `pull_request`-tapahtumaa: Action kieltäytyy toimimasta `pull_request_target`-tapahtumassa.
+
+## Versiointi ja kiinnitys
+
+Julkaisut noudattavat semanttista versiointia, ja niiden tagit ovat muotoa `vX.Y.Z` (katso [`CHANGELOG.md`](CHANGELOG.md)). Ennen versiota 1.0.0 alaversio voi muuttaa syötteitä. Esimerkit käyttävät tarkkaa julkaisutagia (`@v0.1.2`).
+
+Tagia voi siirtää. Jos uhkamallisi vaatii, kiinnitä sen sijaan julkaisun koko 40-merkkinen commit-SHA ja jätä versio kommenttiin, jotta Dependabot voi yhä päivittää sen:
+
+```yaml
+- uses: tonyweckstrom1987/ai-pr-reviewer-action@<koko-commit-sha> # v0.1.2
+  with:
+    api-key: ${{ secrets.LLM_API_KEY }}
+    base-url: https://openrouter.ai/api/v1
+    model: deepseek/deepseek-chat
+```
+
+Versiosta 1.0.0 alkaen liikkuva päätagi (`v1`) osoittaa uusimpaan `v1.x.y`-julkaisuun. Rikkovat muutokset, kuten poistetut tai uudelleen nimetyt syötteet, saavat uuden pääversion. Julkaisun vaiheet ovat tiedostossa [`RELEASING.md`](RELEASING.md) (englanniksi).
+
+## Laatu
+
+[`eval/`](eval/README.md) mittaa, löytääkö tarkastaja tunnetut viat ja montako väärää hälytystä se antaa: 17 pientä itse kirjoitettua diffiä (12 diffissä yhteensä 13 tunnettua vikaa, 5 puhdasta), pisteytys mekaanisesti (sama tiedosto, rivi enintään yhden päässä, viestissä avainsana). Mallin vastaukset tallennetaan kaseteiksi kansioon `eval/cassettes/`, joten CI toistaa ne oikean `run()`-polun läpi ilman verkkokutsuja ja avaimia.
+
+**Yhtään kielimallia ei ole vielä mitattu.** Ainoat kasetit ovat kahdesta keinomallista (koodia, ei malleja). Ne osoittavat, että mittari toimii, ja antavat alarajan, joka mallin pitää ylittää:
+
+| Kasetti | Löydetyt viat | Väärät hälytykset | Puhtaat diffit ilman löydöksiä |
+|---|---|---|---|
+| stub-rule-baseline (7 säännöllistä lauseketta, vertailutaso) | 7/13 | 1 | 4/5 |
+| stub-reference (palauttaa odotetut vastaukset, tarkistus) | 13/13 | 0 | 5/5 |
+
+Toisto: `node eval/run.js`. Oikean mallin nauhoitus vaatii oman avaimen (katso [`eval/README.md`](eval/README.md)).
+
 ## Prompt injection -testisarja
 
 Katso [`injektio/README.md`](injektio/README.md) (suomeksi): 19 tapausta (OWASP LLM01/LLM06), kanariamittari ja ajuri, joka kirjaa tulokset `kokeilut.jsonl`-muotoon.
@@ -71,14 +113,16 @@ Katto on tokeneissa, ei dollareissa: tokenit tiedetään ennen kutsua, dollarihi
 
 - **Ei PR:n koodia.** Action ei tee checkoutia, ei aja mitään eikä kirjoita tiedostoja. Testi tarkistaa, ettei lähdekoodissa ole `child_process`-, `eval`- tai tiedostokirjoituskutsuja eikä kolmannen osapuolen riippuvuuksia.
 - **`pull_request`, ei `pull_request_target`.** Jälkimmäisellä salaisuudet olisivat käytössä fork-PR:ille, joiden teksti on epäluotettavaa. Action kieltäytyy käynnistymästä `pull_request_target`-tapahtumalla.
-- **Salaisuuksien siivous ennen mallia.** Tunnetut avainmuodot ja `key/token/secret/password`-sijoitukset korvataan, ja `.env`-, avain-, lukko- ja binääritiedostoja ei lähetetä lainkaan. Siivous on regex-pohjainen paras yritys, ei takuu.
+- **Salaisuuksien siivous ennen mallia.** Tunnetut avainmuodot, `Bearer`-tunnisteet (kaikilla kirjainkoilla: `Bearer`, `bearer`, `BEARER`) ja `key/token/secret/password`-sijoitukset korvataan, ja `.env`-, avain-, lukko- ja binääritiedostoja ei lähetetä lainkaan. Sijoitukset tunnistetaan kahdessa lineaarisessa vaiheessa, joten pitkät avaimen näköiset sanat eivät hidasta siivousta. Siivous on regex-pohjainen paras yritys, ei takuu. Arvo päättyy merkkiin `;`, eikä sen jälkeistä osaa peitetä (katso Rajoitukset).
 - **Epäluotettava teksti.** Diff menee mallille `<data>`-lohkossa, jota ei voi sulkea sisältäpäin, ilman työkaluja. Mallin teksti puhdistetaan: ei linkkejä, HTML:ää, kuvia eikä @-mainintoja.
 - **Mallin väitteet tarkistetaan koodilla.** Löydös hyväksytään vain, jos tiedosto oli mukana ja rivi on lisätty rivi, jonka malli näki. Muut pudotetaan ja kommentti kertoo montako.
 - **"En tiedä" on hyväksytty vastaus.** Malli saa vastata `unknown`, ja kommentti sanoo silloin suoraan, ettei se ole arvio PR:stä.
+- **Käytäntö ja uhkamalli.** [`SECURITY.md`](SECURITY.md) (englanniksi) listaa jokaisen suojauksen lähdekoodin sijainteineen, tunnetut rajoitukset ja ohjeen haavoittuvuuden ilmoittamiseen yksityisesti.
 - **Rajat ovat koodissa.** Tokenkatot, ajokerrat per PR, vastauksen koko ja aikakatkaisu eivät ole mallin tai PR:n sisällön muutettavissa. Uudelleenohjauksia ei seurata (avain ei kulje toiselle palvelimelle), ja kommentin merkin `runs`/`sha` hyväksytään vain bot-tilien kommenteista, joten ihminen ei voi sammuttaa tarkistusta kommentilla.
 
 ## Rajoitukset
 
+- Siivous ei tunnista tuntemattomia salaisuusmuotoja. Yksi tunnettu aukko: sijoituksessa `token=abc123;def456` peitetään vain `;`-merkkiä edeltävä osa. Rajatapaustesti kirjaa tämän tunnetuksi aukoksi (`todo`). Suunnittelun muut rajat: [`SECURITY.md`](SECURITY.md) (englanniksi).
 - Malli voi olla väärässä ja jättää löytämättä asioita. Kommentti sanoo itse "can be wrong". Tarkistus lisäksi tarkastaa vain sijainnin, ei sitä onko väite totta.
 - Vain lisätyt rivit ja yksi mallikutsu. Repon muuta koodia ei lueta, paitsi valinnainen `context-lines` (muutama muuttumaton rivi jokaisen muutoslohkon ympäriltä samasta tiedostosta), ei rivikohtaisia kommentteja (yksi yhteenvetokommentti, päivitetään paikallaan), ei keskustelua eikä automaattisia korjauksia.
 - Suuri PR katkaistaan tokenkattoon: tiedostot, jotka eivät mahdu, näkyvät kommentin kohdassa "Not reviewed". Tiedostolistasta luetaan enintään 300 tiedostoa; loput merkitään tarkistamatta jääneiksi.
@@ -107,7 +151,7 @@ Vaatii Node.js 22 tai uudemman (`engines` kohdassa `package.json`); CI ajaa test
 npm test      # node --test "test/*.test.js"
 ```
 
-201 testiä ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
+Testejä on 229: 228 menee läpi ja 1 on merkitty `todo`-tilaan (tunnettu aukko, ks. yllä), eikä yksikään kaadu. Ne ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
 
 ## Lisenssi
 

@@ -18,13 +18,16 @@ Lisätty:
 
 Muuta:
 
+- Uusi laatumittari `eval/`: 17 itse kirjoitettua diffiä (13 tunnettua vikaa, 5 puhdasta diffiä), mekaaninen pisteytys ja tallennetut mallivastaukset (kasetit kansiossa `eval/cassettes/`), joten CI ei tee mallikutsuja. Tiedostot, tunnisteet ja tulosteet ovat englanniksi (`eval/run.js`, `eval/score.js`, `eval/cases.js`, `eval/stub-models.js`). README:hen lisättiin osio Laatu. Kielimallia ei ole vielä mitattu: kasetit ovat kahdelta keinomallilta. Testejä on nyt 209, joista 208 menee läpi ja 1 on todo-tilassa.
 - README on nyt englanniksi, ja suomenkielinen versio on tiedostossa `README.fi.md`. Kielivaihtolinkki on README:n alussa, ja testi 118 lukee Asetukset-taulukon molemmista tiedostoista ja tarkistaa versioviitteet myös `README.fi.md`:stä (a501ec0).
 - Uudet rajatapaustestit `redact`-, `render`- ja `parseMarker`-toiminnoille (`test/edges.test.js`). Kaksi niistä on merkitty todo-tilaan tunnetuiksi aukoiksi: `;`-merkin jälkeinen osa arvosta ei peity, eikä pienellä kirjoitettu `bearer <token>` peity. README:n testimäärä on 179 (aiemmin 130) (00a3466).
 - Offline-injektiosarjan tulokset lisättiin tiedostoon `injektio/RESULTS.md`, ja README viittaa niihin. Tulokset ovat kahdelta tekaistulta mallilta (koodia, ei kielimalleja), joten ne eivät kerro oikeiden mallien käytöksestä (1ecdf82).
 - README:n kilpailijavertailun PR-Agent-linkki osoittaa uuteen osoitteeseen `The-PR-Agent/pr-agent` sekä englannin- että suomenkielisessä README:ssä (0933f2c).
 - Kontekstirivin katkaisu 400 merkkiin pudottaa myös katkaisukohdassa kesken jääneen sanan, jotta katkennut salaisuus ei lähde mallille lukukelpoisena alkuna (`redact()` ei tunnista liian lyhyttä pätkää). Testi lisätty (`test/context.test.js`).
 
-Testejä on yhteensä 203, joista 201 menee läpi ja 2 on todo-tilassa.
+- Marketplace-valmius, osa 2: README-tiedostoihin uudet osiot Permissions/Oikeudet (tarvittavat oikeudet perusteluineen) ja Versioning and pinning/Versiointi ja kiinnitys (semver-tagit, SHA-kiinnitys, tuleva liikkuva `v1`-päätagi). Uusi `RELEASING.md` kertoo julkaisun tarkistuslistan ja Marketplace-julkaisun vaiheet. Kolme uutta testiä tarkistavat, ettei brändäyksen kuvake ole GitHubin poistamien Feather-kuvakkeiden joukossa, että README-tiedostojen oikeustaulukot vastaavat esimerkkiä ja että `SECURITY.md` nimeää `package.json`in version tuetuksi.
+
+Testejä on 229 (tilanne 20.11.2026), joista 228 menee läpi ja 1 on todo-tilassa.
 
 ## 0.1.2 (6.11.2026)
 

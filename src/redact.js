@@ -9,7 +9,7 @@ const RULES = [
   [/\bxox[abprs]-[A-Za-z0-9-]{10,}\b/g, "[REDACTED slack token]"],
   [/\b\d{8,10}:[A-Za-z0-9_-]{30,}\b/g, "[REDACTED bot token]"],
   [/\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g, "[REDACTED jwt]"],
-  [/\bBearer\s+[A-Za-z0-9._~+/-]{20,}=*/g, "Bearer [REDACTED]"],
+  [/\bBearer\s+[A-Za-z0-9._~+/-]{20,}=*/gi, "Bearer [REDACTED]"],
 ];
 // Assignments are found in two linear steps. PREFIX matches only `name<quote?><sep><quote?>` and the callback
 // checks the name against SECRET_WORD. Only for secret names is the value read (VALUE, sticky), so a non-secret
