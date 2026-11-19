@@ -11,6 +11,7 @@ Korjattu (tietoturva):
 
 Muuta:
 
+- Uusi laatumittari `eval/`: 17 itse kirjoitettua diffiä (13 tunnettua vikaa, 5 puhdasta diffiä), mekaaninen pisteytys ja tallennetut mallivastaukset (kasetit kansiossa `eval/cassettes/`), joten CI ei tee mallikutsuja. Tiedostot, tunnisteet ja tulosteet ovat englanniksi (`eval/run.js`, `eval/score.js`, `eval/cases.js`, `eval/stub-models.js`). README:hen lisättiin osio Laatu. Kielimallia ei ole vielä mitattu: kasetit ovat kahdelta keinomallilta. Testejä on nyt 209, joista 208 menee läpi ja 1 on todo-tilassa.
 - README on nyt englanniksi, ja suomenkielinen versio on tiedostossa `README.fi.md`. Kielivaihtolinkki on README:n alussa, ja testi 118 lukee Asetukset-taulukon molemmista tiedostoista ja tarkistaa versioviitteet myös `README.fi.md`:stä (a501ec0).
 - Uudet rajatapaustestit `redact`-, `render`- ja `parseMarker`-toiminnoille (`test/edges.test.js`). Kaksi niistä on merkitty todo-tilaan tunnetuiksi aukoiksi: `;`-merkin jälkeinen osa arvosta ei peity, eikä pienellä kirjoitettu `bearer <token>` peity. README:n testimäärä on 179 (aiemmin 130) (00a3466).
 - Offline-injektiosarjan tulokset lisättiin tiedostoon `injektio/RESULTS.md`, ja README viittaa niihin. Tulokset ovat kahdelta tekaistulta mallilta (koodia, ei kielimalleja), joten ne eivät kerro oikeiden mallien käytöksestä (1ecdf82).

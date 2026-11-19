@@ -72,6 +72,19 @@ A tag can be moved. If your threat model needs it, pin the full 40-character com
 
 From 1.0.0 on, a moving major tag (`v1`) will point at the latest `v1.x.y` release. Breaking changes, such as removed or renamed inputs, will get a new major version. The release steps are in [`RELEASING.md`](RELEASING.md).
 
+## Quality
+
+[`eval/`](eval/README.md) measures whether the reviewer finds known defects and how many false alarms it raises: 17 small hand-written diffs (12 with 13 known defects, 5 clean), scored mechanically (same file, line within 1, a keyword in the message). Model replies are stored as cassettes in `eval/cassettes/`, so CI replays them through the real `run()` path without network calls or keys.
+
+**No language model has been measured yet.** The only cassettes so far come from two stub models (code, not models). They show that the metric works and give a floor a model should beat:
+
+| Cassette | Defects found | False alarms | Clean diffs without findings |
+|---|---|---|---|
+| stub-rule-baseline (7 regular expressions, baseline) | 7/13 | 1 | 4/5 |
+| stub-reference (returns the expected answers, sanity check) | 13/13 | 0 | 5/5 |
+
+Reproduce: `node eval/run.js`. Recording a real model needs your own key (see [`eval/README.md`](eval/README.md)).
+
 ## Prompt injection test suite
 
 See [`injektio/README.md`](injektio/README.md) (written in Finnish): 19 cases (OWASP LLM01/LLM06), a canary metric, and a runner that records results in `kokeilut.jsonl` format.
@@ -139,7 +152,7 @@ Requires Node.js 22 or newer (`engines` in `package.json`); CI runs the tests on
 npm test      # node --test "test/*.test.js"
 ```
 
-The suite has 198 tests: 197 pass and 1 is marked `todo` (a known gap, see above), with no failures. They run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
+The suite has 212 tests: 211 pass and 1 is marked `todo` (a known gap, see above), with no failures. They run without a network and without keys. The source has also been broken on purpose (e.g. removing a limit, bypassing redaction, following a redirect) to check that the tests catch it.
 
 ## License
 
