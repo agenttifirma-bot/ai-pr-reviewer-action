@@ -47,16 +47,16 @@ Security policy and threat model: see [`SECURITY.md`](SECURITY.md).
 
 ## Quality
 
-[`eval/`](eval/README.md) measures whether the reviewer finds known defects and how many false alarms it raises: 17 small hand-written diffs (12 with 13 known defects, 5 clean), scored mechanically (same file, line within 1, a keyword in the message). Model replies are stored as cassettes in `eval/nauhat/`, so CI replays them through the real `run()` path without network calls or keys.
+[`eval/`](eval/README.md) measures whether the reviewer finds known defects and how many false alarms it raises: 17 small hand-written diffs (12 with 13 known defects, 5 clean), scored mechanically (same file, line within 1, a keyword in the message). Model replies are stored as cassettes in `eval/cassettes/`, so CI replays them through the real `run()` path without network calls or keys.
 
 **No language model has been measured yet.** The only cassettes so far come from two stub models (code, not models). They show that the metric works and give a floor a model should beat:
 
 | Cassette | Defects found | False alarms | Clean diffs without findings |
 |---|---|---|---|
-| keinomalli-saantopohja (7 regular expressions, baseline) | 7/13 | 1 | 4/5 |
-| keinomalli-viite (returns the expected answers, sanity check) | 13/13 | 0 | 5/5 |
+| stub-rule-baseline (7 regular expressions, baseline) | 7/13 | 1 | 4/5 |
+| stub-reference (returns the expected answers, sanity check) | 13/13 | 0 | 5/5 |
 
-Reproduce: `node eval/aja.js`. Recording a real model needs your own key (see [`eval/README.md`](eval/README.md)).
+Reproduce: `node eval/run.js`. Recording a real model needs your own key (see [`eval/README.md`](eval/README.md)).
 
 ## Prompt injection test suite
 

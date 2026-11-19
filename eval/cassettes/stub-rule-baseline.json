@@ -1,93 +1,93 @@
 {
- "muoto": "aprr-eval-nauha/1",
- "malli": "keinomalli-saantopohja",
- "lahde": "keinomalli",
- "nauhoitettu": "2026-11-18T10:00:52Z",
- "kehote_sha256": "bd8220457a9e11d647d5e9c21645613ca888beaf1e8430ff39d0da437c55caa7",
+ "format": "aprr-eval-cassette/1",
+ "model": "stub-rule-baseline",
+ "source": "stub",
+ "recorded": "2026-11-18T10:00:52Z",
+ "prompt_sha256": "bd8220457a9e11d647d5e9c21645613ca888beaf1e8430ff39d0da437c55caa7",
  "max_output_tokens": 1500,
- "vastaukset": {
-  "vika-01-sql-ketjutus": {
-   "pyynto_sha256": "de28bc7f7e884ff43cf18a3574617c9f834a8515526ef0a056cab5475afb8e0e",
+ "replies": {
+  "defect-01-sql-concat": {
+   "request_sha256": "de28bc7f7e884ff43cf18a3574617c9f834a8515526ef0a056cab5475afb8e0e",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"1 rule match(es).\",\"findings\":[{\"file\":\"src/users.js\",\"line\":2,\"severity\":\"high\",\"confidence\":\"medium\",\"message\":\"SQL query is built by string concatenation: SQL injection.\"}]}",
    "usage": null
   },
-  "vika-02-silmukka-yli": {
-   "pyynto_sha256": "43c33d0cc4b898ea4273c9ba7dfd05a182a0801efb70b6cabea9d13a436edc1c",
+  "defect-02-loop-overrun": {
+   "request_sha256": "43c33d0cc4b898ea4273c9ba7dfd05a182a0801efb70b6cabea9d13a436edc1c",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"1 rule match(es).\",\"findings\":[{\"file\":\"src/orders.js\",\"line\":3,\"severity\":\"medium\",\"confidence\":\"medium\",\"message\":\"Loop bound uses <= length: off-by-one, reads past the end.\"}]}",
    "usage": null
   },
-  "vika-03-null-tarkistus": {
-   "pyynto_sha256": "dffd88c5b838e9b4cc525bd3f07ffa73d56db72c42959b2769cd2e674d9a2882",
+  "defect-03-null-check": {
+   "request_sha256": "dffd88c5b838e9b4cc525bd3f07ffa73d56db72c42959b2769cd2e674d9a2882",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"0 rule match(es).\",\"findings\":[]}",
    "usage": null
   },
-  "vika-04-komentoinjektio": {
-   "pyynto_sha256": "41ff2004ca4a0b507075a4f8da4d896f5dc3b541996828c8646706a981a03a5b",
+  "defect-04-command-injection": {
+   "request_sha256": "41ff2004ca4a0b507075a4f8da4d896f5dc3b541996828c8646706a981a03a5b",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"1 rule match(es).\",\"findings\":[{\"file\":\"src/archive.js\",\"line\":5,\"severity\":\"high\",\"confidence\":\"medium\",\"message\":\"Shell command is built from input: command injection.\"}]}",
    "usage": null
   },
-  "vika-05-polku-ohitus": {
-   "pyynto_sha256": "b8c8d84e286a10729650961e669f1a0395e04d6865995af90b3e861e8204a675",
+  "defect-05-path-traversal": {
+   "request_sha256": "b8c8d84e286a10729650961e669f1a0395e04d6865995af90b3e861e8204a675",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"0 rule match(es).\",\"findings\":[]}",
    "usage": null
   },
-  "vika-06-await-puuttuu": {
-   "pyynto_sha256": "031b87f814ca5a5d1119d12f963f194479cf67447ec113724465ba241f41e1b2",
+  "defect-06-missing-await": {
+   "request_sha256": "031b87f814ca5a5d1119d12f963f194479cf67447ec113724465ba241f41e1b2",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"0 rule match(es).\",\"findings\":[]}",
    "usage": null
   },
-  "vika-07-py-oletuslista": {
-   "pyynto_sha256": "e4f7ab9cb8bf1ccf5fae6ca57ea13dc2ac5cd2d6bbe0a49cf7c1279633982f30",
+  "defect-07-py-mutable-default": {
+   "request_sha256": "e4f7ab9cb8bf1ccf5fae6ca57ea13dc2ac5cd2d6bbe0a49cf7c1279633982f30",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"1 rule match(es).\",\"findings\":[{\"file\":\"app/tags.py\",\"line\":1,\"severity\":\"medium\",\"confidence\":\"medium\",\"message\":\"Mutable default argument is shared between calls.\"}]}",
    "usage": null
   },
-  "vika-08-py-nollalla-jako": {
-   "pyynto_sha256": "997d829295d9f8c56be268c51bd0080694c1b3739259e426873b89dffe1852ce",
+  "defect-08-py-divide-by-zero": {
+   "request_sha256": "997d829295d9f8c56be268c51bd0080694c1b3739259e426873b89dffe1852ce",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"0 rule match(es).\",\"findings\":[]}",
    "usage": null
   },
-  "vika-09-py-niellyt-virheet": {
-   "pyynto_sha256": "92e8f8ef6678550d338fae57a4e9548e09426cfa66bdd2002b982e5f7893a860",
+  "defect-09-py-swallowed-errors": {
+   "request_sha256": "92e8f8ef6678550d338fae57a4e9548e09426cfa66bdd2002b982e5f7893a860",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"1 rule match(es).\",\"findings\":[{\"file\":\"app/config.py\",\"line\":7,\"severity\":\"medium\",\"confidence\":\"medium\",\"message\":\"Bare except swallows every error.\"}]}",
    "usage": null
   },
-  "vika-10-sijoitus-ehdossa": {
-   "pyynto_sha256": "add9537d8687ab4818d403a279dcbb80381130186f7df8d098617d2da0c52c1f",
+  "defect-10-assignment-in-condition": {
+   "request_sha256": "add9537d8687ab4818d403a279dcbb80381130186f7df8d098617d2da0c52c1f",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"1 rule match(es).\",\"findings\":[{\"file\":\"src/cleanup.js\",\"line\":6,\"severity\":\"high\",\"confidence\":\"medium\",\"message\":\"Assignment inside a condition; comparison (===) was probably meant.\"}]}",
    "usage": null
   },
-  "vika-11-fetch-tila": {
-   "pyynto_sha256": "d81d3d79604ce9be5ede3c1448371bb9b37c448373251044c75546d9614c15c7",
+  "defect-11-fetch-status": {
+   "request_sha256": "d81d3d79604ce9be5ede3c1448371bb9b37c448373251044c75546d9614c15c7",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"0 rule match(es).\",\"findings\":[]}",
    "usage": null
   },
-  "vika-12-kaksi-vikaa": {
-   "pyynto_sha256": "dcca1566b5aa6daa192b3c8d4774c5bc5623a1cd1fa1ea55407e13dbf1ea926e",
+  "defect-12-two-defects": {
+   "request_sha256": "dcca1566b5aa6daa192b3c8d4774c5bc5623a1cd1fa1ea55407e13dbf1ea926e",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"1 rule match(es).\",\"findings\":[{\"file\":\"src/calc.js\",\"line\":2,\"severity\":\"high\",\"confidence\":\"medium\",\"message\":\"eval() on input allows arbitrary code execution.\"}]}",
    "usage": null
   },
-  "puhdas-01-parametrit": {
-   "pyynto_sha256": "4a3abd78886daaa0b3b46b0f81889a1fb8d2b7639692447dc12e6eb3a592c8cb",
+  "clean-01-parameterized": {
+   "request_sha256": "4a3abd78886daaa0b3b46b0f81889a1fb8d2b7639692447dc12e6eb3a592c8cb",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"0 rule match(es).\",\"findings\":[]}",
    "usage": null
   },
-  "puhdas-02-silmukka-oikein": {
-   "pyynto_sha256": "20a812a4269deba0b3c3eddecf751866c2a9a6ee332f2c98d66423a88195daab",
+  "clean-02-loop-correct": {
+   "request_sha256": "20a812a4269deba0b3c3eddecf751866c2a9a6ee332f2c98d66423a88195daab",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"1 rule match(es).\",\"findings\":[{\"file\":\"src/numbered.js\",\"line\":3,\"severity\":\"medium\",\"confidence\":\"medium\",\"message\":\"Loop bound uses <= length: off-by-one, reads past the end.\"}]}",
    "usage": null
   },
-  "puhdas-03-uudelleennimeays": {
-   "pyynto_sha256": "998477f9ac98a257898fab9c33cdc0dd6c96ba0bd1217a9e23bfda2c9c96796e",
+  "clean-03-rename": {
+   "request_sha256": "998477f9ac98a257898fab9c33cdc0dd6c96ba0bd1217a9e23bfda2c9c96796e",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"0 rule match(es).\",\"findings\":[]}",
    "usage": null
   },
-  "puhdas-04-dokumentaatio": {
-   "pyynto_sha256": "d812b6b9dcf6f8326b2d99f08a1019ca88a2ccd6e5d5fd3b6e01737abf12a67f",
+  "clean-04-docs-only": {
+   "request_sha256": "d812b6b9dcf6f8326b2d99f08a1019ca88a2ccd6e5d5fd3b6e01737abf12a67f",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"0 rule match(es).\",\"findings\":[]}",
    "usage": null
   },
-  "puhdas-05-py-tarkistettu": {
-   "pyynto_sha256": "cc0fac9ac2bd4d500e84160386258d9397cc4c1ebcf79a21ea9e99f7a225a865",
+  "clean-05-py-guarded": {
+   "request_sha256": "cc0fac9ac2bd4d500e84160386258d9397cc4c1ebcf79a21ea9e99f7a225a865",
    "content": "{\"result\":\"ok\",\"analysis\":\"rule-based baseline\",\"summary\":\"0 rule match(es).\",\"findings\":[]}",
    "usage": null
   }
