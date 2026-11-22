@@ -104,7 +104,10 @@ test("examples and README Action references use the package.json version", () =>
 });
 
 test("action.yml: branding icon is not one of the Feather icons GitHub omits", () => {
-  const icon = /^branding:\n  icon: "([a-z-]+)"/m.exec(read("action.yml"))[1];
+  // Tolerates CRLF, other indentation and single or no quotes; fails with a clear message if the key is missing.
+  const m = /^branding:[ \t]*\r?\n(?:[ \t]+[^\r\n]*\r?\n)*?[ \t]+icon:[ \t]*["']?([a-z-]+)["']?[ \t]*\r?$/m.exec(read("action.yml"));
+  assert.ok(m, "action.yml: branding.icon not found");
+  const icon = m[1];
   const omitted = ["coffee", "columns", "divide-circle", "divide-square", "divide", "frown", "hexagon", "key", "meh", "mouse-pointer", "smile", "tool", "x-octagon"];
   assert.ok(!omitted.includes(icon), `${icon} is not available as a Marketplace icon`);
 });
