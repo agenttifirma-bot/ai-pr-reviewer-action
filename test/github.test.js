@@ -15,9 +15,19 @@ test("listFiles: follows pages and flags truncation at the list limit", async ()
   assert.deepEqual(await gh2.listFiles("o", "r", 5).then((x) => [x.files.length, x.truncated]), [3, false]);
 });
 
-test("listBotComments: only bot-authored comments count, so a human cannot plant a marker", async () => {
-  const gh = client({ token: "t", fetchImpl: async () => json([{ id: 1, user: { type: "User" } }, { id: 2, user: { type: "Bot" } }, { id: 3 }, null]) });
-  assert.deepEqual((await gh.listBotComments("o", "r", 5)).map((c) => c.id), [2]);
+test("listBotComments: only the action's own bot counts, a foreign bot or a human cannot plant a marker", async () => {
+  const own = { id: 1, user: { type: "Bot", login: "github-actions[bot]" } };
+  const foreignBot = { id: 2, user: { type: "Bot", login: "other-app[bot]" } };
+  const human = { id: 3, user: { type: "User", login: "someone" } };
+  const humanWithBotName = { id: 4, user: { type: "User", login: "github-actions[bot]" } };
+  const noLogin = { id: 5, user: { type: "Bot" } };
+  const gh = client({ token: "t", fetchImpl: async () => json([own, foreignBot, human, humanWithBotName, noLogin, { id: 6 }, null]) });
+  assert.deepEqual((await gh.listBotComments("o", "r", 5)).map((c) => c.id), [1]);
+});
+
+test("listBotComments: the own login is compared without regard to letter case", async () => {
+  const gh = client({ token: "t", fetchImpl: async () => json([{ id: 1, user: { type: "Bot", login: "GitHub-Actions[bot]" } }]) });
+  assert.deepEqual((await gh.listBotComments("o", "r", 5)).map((c) => c.id), [1]);
 });
 
 test("requests carry the token, never follow redirects, and use the right verbs and paths", async () => {

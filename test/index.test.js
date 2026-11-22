@@ -74,7 +74,7 @@ test("the same commit is not reviewed twice; a new commit updates the same comme
 });
 
 test("run limit per pull request is a hard stop", async () => {
-  const net = fakeNet({ comments: [{ id: 5, user: { type: "Bot" }, body: marker(SHA2, 5) + "\nold" }], reply: okReply() });
+  const net = fakeNet({ comments: [{ id: 5, user: { type: "Bot", login: "github-actions[bot]" }, body: marker(SHA2, 5) + "\nold" }], reply: okReply() });
   const r = await go(net);
   assert.equal(r.outcome, "skipped_run_limit");
   assert.equal(net.llmCalls().length, 0);
@@ -86,6 +86,30 @@ test("a human cannot switch reviews off by planting the marker", async () => {
   const net = fakeNet({ comments: [{ id: 5, user: { type: "User" }, body: marker(SHA, 99) }], reply: okReply() });
   const r = await go(net);
   assert.equal(r.outcome, "reviewed");
+});
+
+test("a foreign bot cannot switch reviews off or reset the run count by planting a marker", async () => {
+  const foreign = { type: "Bot", login: "other-app[bot]" };
+  const limit = fakeNet({ comments: [{ id: 5, user: foreign, body: marker(SHA2, 99) }], reply: okReply() });
+  assert.equal((await go(limit)).outcome, "reviewed");
+  assert.equal(limit.llmCalls().length, 1);
+  const sameSha = fakeNet({ comments: [{ id: 5, user: foreign, body: marker(SHA, 1) }], reply: okReply() });
+  assert.equal((await go(sameSha)).outcome, "reviewed");
+  // the foreign comment is left alone and the action writes its own
+  assert.equal(sameSha.state.comments.length, 2);
+  assert.equal(sameSha.state.comments[0].body, marker(SHA, 1));
+});
+
+test("the marker of the action's own bot still counts when a foreign bot comment is newer", async () => {
+  const net = fakeNet({
+    comments: [
+      { id: 5, user: { type: "Bot", login: "github-actions[bot]" }, body: marker(SHA, 3) + "\nmine" },
+      { id: 9, user: { type: "Bot", login: "other-app[bot]" }, body: marker(SHA2, 1) + "\nforeign" },
+    ],
+    reply: okReply(),
+  });
+  assert.equal((await go(net)).outcome, "skipped_same_sha");
+  assert.equal(net.llmCalls().length, 0);
 });
 
 test("budget: files that do not fit are reported, and nothing is called when nothing fits", async () => {
@@ -198,8 +222,8 @@ test("bad base URL fails before any reservation: no comment, no run counter, no 
 test("with several earlier bot comments the newest one decides", async () => {
   const net = fakeNet({
     comments: [
-      { id: 5, user: { type: "Bot" }, body: marker(SHA2, 1) + "\nold" },
-      { id: 9, user: { type: "Bot" }, body: marker(SHA, 3) + "\nnewest" },
+      { id: 5, user: { type: "Bot", login: "github-actions[bot]" }, body: marker(SHA2, 1) + "\nold" },
+      { id: 9, user: { type: "Bot", login: "github-actions[bot]" }, body: marker(SHA, 3) + "\nnewest" },
     ],
     reply: okReply(),
   });
@@ -224,7 +248,7 @@ test("missing pull-requests: write stops the job before any LLM call", async () 
 });
 
 test("failed comment write on a repeated push never reaches the LLM, so the run count cannot be dodged", async () => {
-  const old = { id: 5, user: { type: "Bot" }, body: marker(SHA2, 1) + "\nold review" };
+  const old = { id: 5, user: { type: "Bot", login: "github-actions[bot]" }, body: marker(SHA2, 1) + "\nold review" };
   const net = fakeNet({ comments: [old], reply: okReply() });
   const inner = net.fetchImpl;
   const denied = async (url, init = {}) => (init.method === "PATCH" ? new Response("{}", { status: 403 }) : inner(url, init));
@@ -242,7 +266,7 @@ test("the run is counted before the model call, so a failing model still hits th
 });
 
 test("reservation keeps the previous review text until the new one replaces it", async () => {
-  const old = { id: 5, user: { type: "Bot" }, body: marker(SHA2, 1) + "\nold review text" };
+  const old = { id: 5, user: { type: "Bot", login: "github-actions[bot]" }, body: marker(SHA2, 1) + "\nold review text" };
   const net = fakeNet({ comments: [old], reply: okReply(), llmStatus: 500 });
   await assert.rejects(go(net));
   assert.ok(net.state.comments[0].body.startsWith(marker(SHA2, 2)));

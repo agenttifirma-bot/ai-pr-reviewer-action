@@ -95,12 +95,12 @@ test("github: a body that is not JSON is reported as a network error, not a cras
 
 test("github: listBotComments reads the next page only when the page was full", async () => {
   const urls = [];
-  const full = Array.from({ length: 100 }, (_, i) => ({ id: i, user: { type: "Bot" } }));
+  const full = Array.from({ length: 100 }, (_, i) => ({ id: i, user: { type: "Bot", login: "github-actions[bot]" } }));
   const gh = client({
     token: "t",
     fetchImpl: async (url) => {
       urls.push(url);
-      return json(urls.length === 1 ? full : [{ id: 500, user: { type: "Bot" } }]);
+      return json(urls.length === 1 ? full : [{ id: 500, user: { type: "Bot", login: "github-actions[bot]" } }]);
     },
   });
   const got = await gh.listBotComments("o", "r", 5);
@@ -112,7 +112,7 @@ test("github: listBotComments reads the next page only when the page was full", 
 
 test("github: listBotComments stops at the page limit however many comments there are", async () => {
   let n = 0;
-  const full = Array.from({ length: 100 }, (_, i) => ({ id: i, user: { type: "Bot" } }));
+  const full = Array.from({ length: 100 }, (_, i) => ({ id: i, user: { type: "Bot", login: "github-actions[bot]" } }));
   const gh = client({ token: "t", fetchImpl: async () => { n += 1; return json(full); } });
   const got = await gh.listBotComments("o", "r", 5);
   assert.equal(n, MAX_COMMENT_PAGES);

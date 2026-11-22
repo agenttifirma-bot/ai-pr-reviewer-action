@@ -117,7 +117,7 @@ Katto on tokeneissa, ei dollareissa: tokenit tiedetään ennen kutsua, dollarihi
 - **Mallin väitteet tarkistetaan koodilla.** Löydös hyväksytään vain, jos tiedosto oli mukana ja rivi on lisätty rivi, jonka malli näki. Muut pudotetaan ja kommentti kertoo montako.
 - **"En tiedä" on hyväksytty vastaus.** Malli saa vastata `unknown`, ja kommentti sanoo silloin suoraan, ettei se ole arvio PR:stä.
 - **Käytäntö ja uhkamalli.** [`SECURITY.md`](SECURITY.md) (englanniksi) listaa jokaisen suojauksen lähdekoodin sijainteineen, tunnetut rajoitukset ja ohjeen haavoittuvuuden ilmoittamiseen yksityisesti.
-- **Rajat ovat koodissa.** Tokenkatot, ajokerrat per PR, vastauksen koko ja aikakatkaisu eivät ole mallin tai PR:n sisällön muutettavissa. Uudelleenohjauksia ei seurata (avain ei kulje toiselle palvelimelle), ja kommentin merkin `runs`/`sha` hyväksytään vain bot-tilien kommenteista, joten ihminen ei voi sammuttaa tarkistusta kommentilla.
+- **Rajat ovat koodissa.** Tokenkatot, ajokerrat per PR, vastauksen koko ja aikakatkaisu eivät ole mallin tai PR:n sisällön muutettavissa. Uudelleenohjauksia ei seurata (avain ei kulje toiselle palvelimelle), ja kommentin merkin `runs`/`sha` hyväksytään vain Actionin oman bottitilin (`github-actions[bot]`, oletuksena `GITHUB_TOKEN`-tunnuksella kirjoitettujen kommenttien tekijä) kommenteista, joten ihminen tai toinen sovellus ei voi sammuttaa tarkistusta kommentilla.
 
 ## Rajoitukset
 
@@ -150,7 +150,7 @@ Vaatii Node.js 22 tai uudemman (`engines` kohdassa `package.json`); CI ajaa test
 npm test      # node --test "test/*.test.js"
 ```
 
-Testejä on 212: 211 menee läpi ja 1 on merkitty `todo`-tilaan (tunnettu aukko, ks. yllä), eikä yksikään kaadu. Ne ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
+Testejä on 215: 214 menee läpi ja 1 on merkitty `todo`-tilaan (tunnettu aukko, ks. yllä), eikä yksikään kaadu. Ne ajetaan ilman verkkoa ja ilman avaimia. Lähdekoodia on lisäksi rikottu tarkoituksella (esim. rajan poisto, siivouksen ohitus, uudelleenohjauksen seuranta), jotta nähdään, että testit huomaavat virheen.
 
 ## Lisenssi
 
